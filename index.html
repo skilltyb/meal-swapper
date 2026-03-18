@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Meal Swapper">
+<title>Meal Swapper</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f0f0f; --surface:#1a1a1a; --surface2:#222;
+  --border:#2a2a2a; --border2:#333;
+  --text:#f0ede8; --text2:#888; --text3:#555;
+  --green:#4ade80; --green-dim:#1a3d2a;
+  --amber:#fbbf24; --amber-dim:#3d2e0a;
+  --blue:#60a5fa; --blue-dim:#0d1f3d;
+  --red:#f87171; --red-dim:#3d1a1a;
+  --purple:#c084fc; --purple-dim:#2d1a4d;
+  --radius:14px; --radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow:hidden}
+#root{display:flex;flex-direction:column;height:100%;height:-webkit-fill-available}
+
+/* ── AUTH ── */
+#auth{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;gap:18px;z-index:200}
+#auth h2{font-size:24px;font-weight:600}
+#auth p{font-size:14px;color:var(--text2);line-height:1.6;max-width:300px}
+.connect-btn{background:var(--green-dim);border:1px solid var(--green);color:var(--green);padding:16px 32px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;transition:all .2s}
+.connect-btn:hover{background:var(--green);color:var(--bg)}
+.info-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:12px;color:var(--text2);line-height:1.7;max-width:320px;text-align:left}
+.info-box strong{color:var(--text)}
+
+/* ── NAV TABS ── */
+#nav{display:flex;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
+.nav-tab{flex:1;padding:11px 4px;font-size:11px;font-weight:600;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase}
+.nav-tab.active{color:var(--green);border-bottom-color:var(--green)}
+
+/* ── HEADER ── */
+#header{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 16px 8px;flex-shrink:0}
+#header .ey{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace}
+#header .dn{font-size:24px;font-weight:600;letter-spacing:-.5px;margin-top:2px}
+#header .ds{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:1px}
+
+/* ── DAY BAR ── */
+#daybar{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--bg);scrollbar-width:none}
+#daybar::-webkit-scrollbar{display:none}
+.dpill{flex-shrink:0;padding:9px 13px;font-size:11px;font-weight:600;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase}
+.dpill.gym.active{color:var(--blue);border-bottom-color:var(--blue)}
+.dpill.golf.active{color:var(--amber);border-bottom-color:var(--amber)}
+.dpill.rest.active{color:var(--green);border-bottom-color:var(--green)}
+
+/* ── SCROLL ── */
+#scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+
+/* ── WORKOUT ── */
+.workout{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:10px;font-size:12px;color:var(--text2);line-height:1.5;font-family:'DM Mono',monospace}
+
+/* ── TOTALS ── */
+.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.tc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 4px;text-align:center}
+.tc .n{font-size:16px;font-weight:600;font-family:'DM Mono',monospace}
+.tc .l{font-size:10px;color:var(--text3);margin-top:1px;letter-spacing:1px;text-transform:uppercase}
+.tc.cal .n{color:var(--text2)}.tc.pro .n{color:var(--blue)}.tc.carb .n{color:var(--amber)}.tc.fat .n{color:var(--green)}
+
+/* ── NUTRITION PROGRESS BAR ── */
+.nut-progress{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px}
+.nut-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.nut-row:last-child{margin-bottom:0}
+.nut-label{font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;width:52px;flex-shrink:0}
+.nut-bar-bg{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.nut-bar-fill{height:100%;border-radius:3px;transition:width .4s}
+.nut-val{font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);width:52px;text-align:right;flex-shrink:0}
+.nut-val.over{color:var(--amber)}
+
+/* ── MEAL CARD ── */
+.mcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.mcard.open{border-color:var(--border2)}
+.mhead{padding:13px 14px}
+.mslot{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;font-family:'DM Mono',monospace}
+.mtoprow{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.mname{font-size:16px;font-weight:600;line-height:1.2;flex:1}
+.mwhy{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.4}
+.mmacros{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.mtag{font-size:11px;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace;font-weight:500}
+.mtag.cal{background:var(--surface2);color:var(--text2)}.mtag.pro{background:var(--blue-dim);color:var(--blue)}.mtag.carb{background:var(--amber-dim);color:var(--amber)}.mtag.fat{background:var(--green-dim);color:var(--green)}
+.mbtns{display:flex;gap:6px;margin-top:2px;flex-shrink:0}
+.xbtn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.xbtn.open{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.xbtn.ate{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.xbtn.ate-no{background:var(--surface2);border-color:var(--border2);color:var(--text3)}
+.swapped-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin-left:6px;vertical-align:middle}
+.ate-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:4px;vertical-align:middle}
+
+/* ── RECIPE PANEL ── */
+.rpanel{display:none;border-top:1px solid var(--border)}
+.rpanel.open{display:block}
+.rpin{padding:13px 14px}
+.rlabel{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin:12px 0 7px}
+.rlabel:first-child{margin-top:0}
+.ilist{list-style:none}
+.ilist li{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border);color:var(--text2)}
+.ilist li:last-child{border-bottom:none}
+.in{color:var(--text)}
+.slist{list-style:none;counter-reset:s}
+.slist li{counter-increment:s;padding:6px 0 6px 26px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.5;position:relative}
+.slist li:last-child{border-bottom:none}
+.slist li::before{content:counter(s);position:absolute;left:0;top:7px;width:17px;height:17px;background:var(--surface2);border:1px solid var(--border2);border-radius:50%;font-size:9px;font-weight:600;color:var(--text3);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace}
+.tip{background:var(--surface2);border-left:2px solid var(--amber);padding:8px 12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:12px;color:var(--text2);margin-top:10px;line-height:1.5}
+
+/* ── SWAP SECTION ── */
+.swapsec{border-top:1px solid var(--border);padding:11px 14px}
+.swaplbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px}
+.swappills{display:flex;flex-wrap:wrap;gap:6px}
+.spill{font-size:12px;padding:6px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s;font-weight:500}
+.spill.active{background:var(--green-dim);color:var(--green);border-color:var(--green);font-weight:600}
+
+/* ── GROCERY TAB ── */
+.grocery-section{margin-bottom:16px}
+.gs-title{font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.gi{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.gi:last-child{border-bottom:none}
+.gi-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.gi.checked .gi-check{background:var(--green);border-color:var(--green)}
+.gi-check::after{content:'✓';font-size:10px;color:var(--bg);display:none}
+.gi.checked .gi-check::after{display:block}
+.gi-name{font-size:14px;color:var(--text);flex:1}
+.gi.checked .gi-name{color:var(--text3);text-decoration:line-through}
+.gi-qty{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace}
+.grocery-actions{display:flex;gap:8px;margin-bottom:16px}
+.gact-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;transition:all .15s}
+.gact-btn:hover{border-color:var(--text3);color:var(--text)}
+
+/* ── HISTORY TAB ── */
+.hist-day{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.hist-day-head{padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.hist-day-name{font-size:14px;font-weight:600}
+.hist-day-date{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.hist-meal{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-top:1px solid var(--border);font-size:13px}
+.hist-meal-name{color:var(--text)}
+.hist-meal-slot{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.hist-ate{font-size:10px;padding:2px 8px;border-radius:20px}
+.hist-ate.yes{background:var(--green-dim);color:var(--green)}
+.hist-ate.no{background:var(--surface2);color:var(--text3)}
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3);font-size:14px;line-height:1.7}
+
+/* ── SETTINGS TAB ── */
+.settings-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.settings-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;padding:12px 14px;border-bottom:1px solid var(--border)}
+.setting-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:14px;color:var(--text)}
+.setting-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.setting-val{font-size:13px;color:var(--text2);font-family:'DM Mono',monospace}
+.setting-input{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:6px 10px;width:80px;text-align:center;font-family:'DM Mono',monospace}
+.setting-input:focus{outline:none;border-color:var(--green)}
+.save-btn{background:var(--green-dim);border:1px solid var(--green);color:var(--green);padding:10px 20px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin:0 14px 14px;width:calc(100% - 28px);display:block;transition:all .2s}
+.save-btn:hover{background:var(--green);color:var(--bg)}
+
+/* ── ALCOHOL TRACKER ── */
+.alc-tracker{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.alc-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:12px}
+.alc-week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:12px}
+.alc-day{display:flex;flex-direction:column;align-items:center;gap:4px}
+.alc-day-label{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.5px}
+.alc-count{font-size:18px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text)}
+.alc-count.high{color:var(--red)}
+.alc-count.med{color:var(--amber)}
+.alc-count.low{color:var(--green)}
+.alc-btns{display:flex;gap:6px;justify-content:center}
+.alc-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.alc-btn:hover{border-color:var(--text3);color:var(--text)}
+.alc-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding-top:12px;border-top:1px solid var(--border)}
+.alc-stat{text-align:center}
+.alc-stat .n{font-size:18px;font-weight:600;font-family:'DM Mono',monospace}
+.alc-stat .l{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.5px}
+.alc-stat .n.red{color:var(--red)}.alc-stat .n.amber{color:var(--amber)}.alc-stat .n.green{color:var(--green)}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface);border:1px solid var(--border2);border-radius:99px;padding:10px 18px;font-size:12px;color:var(--text);opacity:0;transition:all .3s;white-space:nowrap;z-index:999;pointer-events:none;font-family:'DM Mono',monospace;letter-spacing:.5px}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:var(--green);color:var(--green)}
+#toast.err{border-color:var(--red);color:var(--red)}
+</style>
+</head>
+<body>
+<div id="root">
+  <div id="auth">
+    <div style="font-size:40px">🍽️</div>
+    <h2>Meal Swapper</h2>
+    <p>Connect Google Calendar to sync your meals in real time.</p>
+    <button class="connect-btn" onclick="startAuth()">Connect Google Calendar</button>
+    <div class="info-box"><strong>What this does:</strong> Shows your weekly meal plan, lets you swap meals and syncs changes directly to your calendar — just that day, not the whole series.</div>
+  </div>
+
+  <div id="app" style="display:none;flex-direction:column;height:100%;height:-webkit-fill-available">
+    <div id="nav">
+      <button class="nav-tab active" onclick="showTab('plan')">Plan</button>
+      <button class="nav-tab" onclick="showTab('grocery')">Grocery</button>
+      <button class="nav-tab" onclick="showTab('history')">History</button>
+      <button class="nav-tab" onclick="showTab('settings')">Settings</button>
+    </div>
+
+    <!-- PLAN TAB -->
+    <div id="tab-plan" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+      <div id="header">
+        <div class="ey">Meal Swapper</div>
+        <div class="dn" id="hdrDay">Monday</div>
+        <div class="ds" id="hdrDate">Mar 23</div>
+      </div>
+      <div id="daybar"></div>
+      <div id="scroll"><div id="content"></div></div>
+    </div>
+
+    <!-- GROCERY TAB -->
+    <div id="tab-grocery" style="display:none;flex:1;overflow-y:auto;padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom))">
+      <div id="grocery-content"></div>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div id="tab-history" style="display:none;flex:1;overflow-y:auto;padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom))">
+      <div id="history-content"></div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" style="display:none;flex:1;overflow-y:auto;padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom))">
+      <div id="settings-content"></div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const CLIENT_ID = '126253589323-cmcnra4semf166ssudugd6pq6io2ndsl.apps.googleusercontent.com';
+const REDIRECT  = 'https://gregarious-lokum-1368c9.netlify.app';
+const SCOPES    = 'https://www.googleapis.com/auth/calendar.events';
+
+// ─── MEAL LIBRARY ─────────────────────────────────────────────────────────────
+const M = {
+  "Chicken rice bowl":{cal:720,pro:52,carb:72,fat:18,why:"Fast first meal. Sunday batch chicken — 5 minutes.",ing:[["2 prepped chicken thighs","pulled or sliced"],["1.5 cups jasmine rice","cooked"],["½ lime","squeezed over"],["Hot sauce","to taste"],["3 green onions","sliced"],["½ cup roasted veg","Sunday prep"]],steps:["Reheat chicken in pan with splash of water, covered, 2–3 min.","Scoop rice into bowl. Squeeze lime over and fluff.","Lay chicken over rice. Add veg alongside.","Top with hot sauce and green onion."],tip:"Under 5 minutes when Sunday prep is done.",grocery:{produce:["2 limes","3 green onions"],pantry:["Hot sauce"],prep:["2 chicken thighs (from batch)","1.5 cups jasmine rice (from batch)","½ cup roasted veg (from batch)"]}},
+  "Burrito bowl":{cal:740,pro:50,carb:74,fat:22,why:"Beans add fiber and protein. 10 min from Sunday prep.",ing:[["2 prepped chicken thighs","pulled"],["1.5 cups cooked rice","with lime"],["½ cup black beans","warmed with cumin"],["½ avocado","sliced"],["¼ cup salsa",""],["¼ cup shredded cheddar",""],["2 tbsp Greek yogurt","instead of sour cream"],["Hot sauce, cilantro",""]],steps:["Warm beans in pan with cumin, chili powder, splash of water — 3 min.","Reheat chicken 2–3 min. Pull or slice.","Squeeze lime over rice and fluff.","Add chicken and beans side by side. Top with avocado and salsa.","Finish with cheddar, Greek yogurt, hot sauce."],tip:"Greek yogurt as sour cream adds 5–6g protein. Undetectable.",grocery:{produce:["1 avocado","Cilantro","1 lime"],dairy:["Greek yogurt","Shredded cheddar"],pantry:["Black beans (canned)","Salsa","Cumin","Chili powder"],prep:["2 chicken thighs (from batch)","1.5 cups rice (from batch)"]}},
+  "Tuna pasta":{cal:700,pro:56,carb:68,fat:16,why:"High protein, 15 min. Good midweek change from chicken.",ing:[["2 cans tuna in olive oil","drained"],["2.5 cups cooked pasta","spaghetti or penne"],["½ cup cherry tomatoes","halved"],["2 garlic cloves","sliced thin"],["1 tbsp capers",""],["1 lemon","juice and zest"],["2 tbsp olive oil",""],["Chili flakes, salt",""]],steps:["Toast garlic in olive oil 2 min. Add chili flakes 30 sec.","Add tomatoes, cook 2 min.","Add pasta and tuna. Toss on low heat.","Finish with lemon juice, zest, capers. Season.","Add splash of pasta water if dry."],tip:"Tuna in olive oil is key — the oil becomes the sauce.",grocery:{produce:["½ cup cherry tomatoes","1 lemon","2 garlic cloves"],pantry:["2 cans tuna in olive oil","Pasta (spaghetti or penne)","Capers","Olive oil","Chili flakes"]}},
+  "Big protein salad":{cal:680,pro:54,carb:40,fat:28,why:"Lower carb. White beans keep it filling until 5pm.",ing:[["2 prepped chicken thighs","sliced"],["3 cups romaine or mixed greens",""],["2 hard-boiled eggs","halved"],["½ cup white beans","canned, drained"],["½ cup cherry tomatoes",""],["¼ cup parmesan","shaved"],["3 tbsp olive oil + 1 tbsp red wine vinegar","dressing"],["Dried oregano, salt, pepper",""]],steps:["Whisk olive oil, vinegar, oregano, salt.","Toss greens, tomatoes, beans, parmesan with dressing.","Arrange chicken slices and halved eggs on top.","Crack black pepper over top. Serve immediately."],tip:"White beans are what make this filling enough to carry you through to 5pm.",grocery:{produce:["Romaine or mixed greens","½ cup cherry tomatoes"],dairy:["Parmesan"],pantry:["White beans (canned)","Olive oil","Red wine vinegar","Dried oregano"],prep:["2 chicken thighs (from batch)","2 hard-boiled eggs (from batch)"]}},
+  "Leftover chili + rice":{cal:720,pro:50,carb:76,fat:18,why:"Wednesday's chili reheated. Zero cooking. Carb-forward for golf.",ing:[["1.5 cups leftover chili","from Wednesday"],["1 cup cooked rice",""],["¼ cup shredded cheddar",""],["2 tbsp Greek yogurt",""],["1 slice bread","for mopping"]],steps:["Reheat chili in saucepan with splash of water if thick. 4–5 min.","Scoop rice into bowl. Ladle chili over.","Top with cheddar and Greek yogurt.","Use bread to mop."],tip:"Chili always tastes better the next day. This is why you make it Wednesday.",grocery:{dairy:["Shredded cheddar","Greek yogurt"],pantry:["Bread"],prep:["1.5 cups leftover chili","1 cup rice (from batch)"]}},
+  "Egg fried rice":{cal:730,pro:48,carb:70,fat:24,why:"Day-old Sunday rice + ground beef. One pan, 15 min.",ing:[["6 oz ground beef 80/20",""],["2 eggs","beaten"],["2 cups cooked rice","day-old is best"],["1 cup prepped vegetables","from Sunday"],["3 garlic cloves","minced"],["3 tbsp soy sauce",""],["1 tsp sesame oil",""],["1 tbsp vegetable oil",""],["3 green onions","sliced"]],steps:["Brown beef in smoking hot wok 5 min. Push aside.","Add garlic 30 sec, mix in.","Push aside. Scramble eggs until just set, mix in.","Add rice and veg. Toss on high heat, break up clumps.","Add soy sauce and sesame oil. 1 min. Top with green onion."],tip:"Day-old refrigerated rice is dramatically better — dried grains fry instead of steam.",grocery:{meat:["6 oz ground beef 80/20"],produce:["3 garlic cloves","3 green onions"],dairy:["2 eggs"],pantry:["Soy sauce","Sesame oil","Vegetable oil"],prep:["2 cups day-old rice","1 cup prepped vegetables"]}},
+  "Leftover roasted chicken + salad":{cal:580,pro:48,carb:18,fat:28,why:"Saturday's bird. Zero cooking.",ing:[["2 portions leftover roasted chicken","cold or reheated"],["3 cups mixed greens",""],["½ cup cherry tomatoes",""],["2 tbsp olive oil + 1 tbsp red wine vinegar","dressing"],["Salt, pepper",""]],steps:["Whisk olive oil, vinegar, salt, pepper.","Toss greens and tomatoes with dressing.","Pull chicken and arrange on top.","Eat immediately."],tip:"Cold roast chicken over greens with a sharp vinaigrette is one of the best quick lunches.",grocery:{produce:["Mixed greens","½ cup cherry tomatoes"],pantry:["Olive oil","Red wine vinegar"],prep:["2 portions leftover roasted chicken"]}},
+  "Leftover spaghetti":{cal:660,pro:44,carb:64,fat:20,why:"Friday's spaghetti reheated. 3 minutes.",ing:[["1.5 cups leftover meat sauce",""],["1 cup cooked spaghetti",""],["Parmesan","for serving"]],steps:["Reheat spaghetti and sauce in pan with splash of water, 3–4 min.","Toss to combine. Top with parmesan."],tip:"Spaghetti sauce improves overnight.",grocery:{dairy:["Parmesan"],prep:["1.5 cups leftover meat sauce","1 cup spaghetti"]}},
+  "Greek yogurt + banana":{cal:320,pro:20,carb:46,fat:4,why:"Fast carbs + protein. Zero prep from Sunday jars.",ing:[["1 cup plain Greek yogurt","full fat"],["1 banana","sliced"],["1 tbsp honey",""],["2 tbsp granola","add right before eating"]],steps:["Spoon yogurt into bowl or grab Sunday parfait jar.","Top with sliced banana and honey.","Add granola right before eating.","Eat 60–90 min before gym."],tip:"Prep 3 parfait jars Sunday — grab one on your way out.",grocery:{produce:["Bananas"],dairy:["Plain Greek yogurt (large tub)"],pantry:["Honey","Granola"]}},
+  "Rice cakes + peanut butter":{cal:280,pro:8,carb:38,fat:10,why:"Lightest pre-gym option. Good if lunch was large.",ing:[["2 plain rice cakes",""],["1.5 tbsp peanut butter",""],["1 banana","sliced on top"]],steps:["Spread peanut butter on both rice cakes.","Top with banana slices.","Eat 60–90 min before gym."],tip:"Cheapest snack on the plan.",grocery:{produce:["Bananas"],pantry:["Rice cakes","Peanut butter (large jar)"]}},
+  "Hard-boiled eggs + apple":{cal:340,pro:24,carb:24,fat:16,why:"Higher protein. Good if lunch was carb-heavy.",ing:[["3 hard-boiled eggs","from Sunday prep"],["1 apple","sliced"],["1 tbsp peanut butter","for dipping"]],steps:["Peel eggs right before eating.","Slice apple into wedges.","Dip apple in peanut butter. Eat eggs alongside."],tip:"From Sunday's batch of 12 eggs — zero effort.",grocery:{produce:["Apples"],pantry:["Peanut butter"],prep:["3 hard-boiled eggs (from batch)"]}},
+  "Ground beef stir-fry":{cal:640,pro:46,carb:58,fat:24,why:"One pan, 15 min. Uses Sunday prepped veg and rice.",ing:[["12 oz ground beef 80/20",""],["1.5 cups cooked rice",""],["2 cups prepped roasted veg",""],["3 garlic cloves","minced"],["1 tsp ginger","grated or ground"],["3 tbsp soy sauce",""],["1 tbsp rice vinegar",""],["1 tsp sesame oil",""],["½ tsp chili flakes",""],["1 tbsp vegetable oil",""],["3 green onions","sliced"]],steps:["Mix soy sauce, rice vinegar, sesame oil, chili flakes. Set aside.","Heat oil until smoking. Sear beef flat 2 min, break apart, 5 min total.","Push aside. Add garlic + ginger 30 sec, mix in.","Add veg and sauce. Toss on high heat 2 min.","Serve over rice. Top with green onion."],tip:"If the pan isn't smoking when beef hits it, it's not hot enough.",grocery:{meat:["12 oz ground beef 80/20"],produce:["3 garlic cloves","3 green onions"],pantry:["Soy sauce","Rice vinegar","Sesame oil","Vegetable oil","Chili flakes","Ground ginger"],prep:["1.5 cups rice (from batch)","2 cups roasted veg (from batch)"]}},
+  "Bean and beef chili":{cal:640,pro:50,carb:52,fat:22,why:"Make Wednesday — feeds dinner AND Thursday lunch.",ing:[["1 lb ground beef 80/20","makes 4 servings"],["15 oz canned kidney beans","drained"],["28 oz canned diced tomatoes",""],["1 onion","diced"],["4 garlic cloves","minced"],["2 tbsp chili powder",""],["1 tsp cumin + 1 tsp smoked paprika",""],["½ cup broth",""],["Cheddar, Greek yogurt","for serving"]],steps:["Brown beef until crispy 6–8 min. Don't drain fat.","Add onion 4 min. Add garlic and spices, stir 1 min.","Add tomatoes, beans, broth. Bring to boil.","Simmer uncovered 20 min. Season generously.","Serve with cheddar and Greek yogurt."],tip:"Make a big pot — feeds Wednesday dinner AND Thursday lunch.",grocery:{meat:["1 lb ground beef 80/20"],produce:["1 onion","4 garlic cloves"],dairy:["Shredded cheddar","Greek yogurt"],pantry:["Kidney beans (canned)","Diced tomatoes 28oz (canned)","Beef or chicken broth","Chili powder","Cumin","Smoked paprika"]}},
+  "Spaghetti meat sauce":{cal:660,pro:46,carb:68,fat:20,why:"Friday classic. Make extra for Saturday lunch.",ing:[["1 lb ground beef 80/20","makes 4 servings"],["12 oz spaghetti",""],["28 oz canned crushed tomatoes",""],["1 onion","diced"],["4 garlic cloves","minced"],["2 tbsp olive oil",""],["2 tsp Italian seasoning",""],["½ tsp red pepper flakes",""],["Parmesan","for serving"]],steps:["Brown beef in olive oil until crispy, about 7 min.","Add onion 4 min. Add garlic and spices, stir 30 sec.","Add crushed tomatoes. Simmer 20 min uncovered.","Cook spaghetti al dente. Reserve 1 cup pasta water.","Toss pasta in sauce with pasta water. Top with parmesan."],tip:"Crushed tomatoes make a cohesive sauce. Diced leave it watery.",grocery:{meat:["1 lb ground beef 80/20"],produce:["1 onion","4 garlic cloves"],dairy:["Parmesan"],pantry:["Spaghetti 12oz","Crushed tomatoes 28oz (canned)","Olive oil","Italian seasoning","Red pepper flakes"]}},
+  "Salmon patties":{cal:640,pro:54,carb:44,fat:24,why:"Crispy canned salmon patties. Cheap, high protein, 15 min.",ing:[["14 oz canned salmon","drained"],["1 egg",""],["⅓ cup breadcrumbs",""],["2 garlic cloves","minced"],["1 lemon","zest and juice"],["1 tsp dijon mustard",""],["3 green onions","sliced"],["2 tbsp olive oil","for frying"]],steps:["Drain salmon, remove large bones, flake finely.","Add egg, breadcrumbs, garlic, lemon zest, mustard, green onion. Mix.","Form 4 patties. Refrigerate 10 min.","Pan-fry in olive oil 3–4 min per side without moving.","Serve with lemon squeeze."],tip:"Don't move the patties while cooking — let the crust form before flipping.",grocery:{produce:["1 lemon","2 garlic cloves","3 green onions"],dairy:["1 egg"],pantry:["Canned salmon 14oz","Breadcrumbs","Dijon mustard","Olive oil"]}},
+  "Shakshuka":{cal:620,pro:38,carb:68,fat:18,why:"Cheapest dinner. One pan, 20 min.",ing:[["4 eggs",""],["14 oz canned diced tomatoes",""],["15 oz canned chickpeas","drained"],["1 onion","diced"],["3 garlic cloves","minced"],["2 tbsp olive oil",""],["1 tsp cumin + 1 tsp smoked paprika",""],["½ tsp chili flakes",""],["4 slices crusty bread","for serving"]],steps:["Sauté onion in olive oil 5 min. Add garlic 1 min.","Add spices, stir 30 sec to bloom.","Add tomatoes and chickpeas. Simmer 8 min.","Make 4 wells, crack egg into each. Cover.","Cook covered 5–7 min — whites set, yolks runny. Serve with bread."],tip:"Pull off heat the moment whites set. Runny yolks in the sauce = the whole point.",grocery:{produce:["1 onion","3 garlic cloves"],dairy:["4 eggs"],pantry:["Diced tomatoes 14oz (canned)","Chickpeas 15oz (canned)","Olive oil","Cumin","Smoked paprika","Chili flakes","Crusty bread"]}},
+  "Chicken thigh tacos":{cal:620,pro:46,carb:50,fat:22,why:"Sunday batch chicken in a completely different form.",ing:[["2 prepped chicken thighs","shredded"],["6 corn tortillas",""],["1 cup shredded cabbage",""],["½ avocado","sliced"],["2 limes",""],["1 tsp cumin + 1 tsp chili powder",""],["Hot sauce",""]],steps:["Shred chicken, warm in pan with spices + splash of water 3 min.","Char corn tortillas on gas burner 20 sec per side.","Fill with chicken, cabbage, avocado.","Squeeze lime. Add hot sauce. Eat immediately."],tip:"Charring tortillas on the gas burner makes them taste completely different from microwaved.",grocery:{produce:["1 cup shredded cabbage","1 avocado","2 limes"],pantry:["Corn tortillas","Cumin","Chili powder","Hot sauce"],prep:["2 chicken thighs (from batch)"]}},
+  "Pan-fried chicken thighs":{cal:680,pro:50,carb:46,fat:28,why:"Crispy cast-iron chicken. Best weeknight technique.",ing:[["2 bone-in skin-on chicken thighs",""],["3 medium potatoes","cubed"],["2 cups green beans","trimmed"],["4 garlic cloves",""],["2 tbsp butter + 1 tbsp olive oil",""],["1 tsp smoked paprika",""],["Salt and black pepper",""]],steps:["Pat chicken skin completely dry — twice. Season all over.","Microwave potatoes 5 min. Toss in olive oil + salt. Roast 425°F.","Place chicken skin-down in COLD cast iron. Bring to medium-high. Cook 8 min, don't touch.","Flip. Cook 6 more min until 165°F. Rest 3 min.","Sauté green beans with butter and smashed garlic 4 min."],tip:"Starting in a cold pan renders fat slowly — dramatically crispier skin.",grocery:{meat:["2 bone-in skin-on chicken thighs"],produce:["3 medium potatoes","2 cups green beans","4 garlic cloves"],dairy:["Butter"],pantry:["Olive oil","Smoked paprika"]}},
+  "Whole roasted chicken":{cal:680,pro:60,carb:28,fat:30,why:"Saturday anchor. One bird = tonight + Sunday soup + Monday leftovers.",ing:[["1 whole chicken 3.5–4.5 lbs",""],["4 tbsp butter","softened"],["4 garlic cloves","minced"],["1 lemon","zested and halved"],["2 tsp rosemary","fresh or dried"],["3 carrots, 2 onions, 4 potatoes","roughly chopped"],["Salt, pepper, olive oil",""]],steps:["Spatchcock: cut backbone with shears, press flat. Pat dry — twice.","Mix butter with garlic, lemon zest, rosemary, salt. Push under skin, spread outside.","Toss veg in olive oil + salt. Spread in roasting pan.","Place chicken skin-up on veg. Roast 425°F 40–45 min until 165°F.","Rest 10 min before carving. Save all bones for Sunday soup."],tip:"Completely dry skin is non-negotiable for crispiness. Pat it twice.",grocery:{meat:["1 whole chicken 3.5–4.5 lbs"],produce:["1 lemon","4 garlic cloves","3 carrots","2 onions","4 potatoes","Fresh rosemary (optional)"],dairy:["Butter"],pantry:["Olive oil"]}},
+  "Chicken soup from the carcass":{cal:480,pro:40,carb:44,fat:12,why:"Made from Saturday's bones. Almost free. Better than anything canned.",ing:[["1 chicken carcass + all bones","from Saturday"],["1 onion, 3 carrots, 3 celery stalks","roughly chopped"],["4 garlic cloves","smashed"],["2 bay leaves + 1 tsp peppercorns",""],["6 oz egg noodles",""],["2 tbsp lemon juice",""],["¼ cup fresh parsley",""],["Salt","generously"]],steps:["Carcass + veg in pot. Cover with cold water by 2 inches. Bring to boil.","Reduce to simmer. Skim foam 10 min. Simmer 2 hours uncovered.","Strain. Pick remaining chicken meat from bones.","Return stock to pot. Season generously. Add noodles, cook until tender.","Add chicken back. Stir in lemon juice. Finish with parsley."],tip:"The lemon juice at the end is what makes it taste alive. Do not skip it.",grocery:{produce:["1 onion","3 carrots","3 celery stalks","4 garlic cloves","Fresh parsley","1 lemon"],pantry:["Egg noodles 6oz","Bay leaves","Black peppercorns"],prep:["1 chicken carcass + bones (from Saturday)"]}},
+  "Ground beef tacos":{cal:600,pro:44,carb:50,fat:22,why:"Quick post-golf dinner. Fridge to table in 15 min.",ing:[["12 oz ground beef 80/20",""],["6 corn tortillas",""],["1 cup shredded cabbage",""],["½ avocado","sliced"],["2 limes",""],["1 tsp cumin + 1 tsp chili powder",""],["¼ cup shredded cheddar",""],["Hot sauce",""]],steps:["Brown beef over high heat 5 min.","Add cumin, chili powder, salt, splash of water. Stir 1 min.","Char tortillas on gas burner 20 sec per side.","Fill with beef, cabbage, avocado, cheddar. Squeeze lime. Hot sauce."],tip:"Fastest post-golf dinner on the plan.",grocery:{meat:["12 oz ground beef 80/20"],produce:["1 cup shredded cabbage","1 avocado","2 limes"],dairy:["Shredded cheddar"],pantry:["Corn tortillas","Cumin","Chili powder","Hot sauce"]}},
+  "Banana + hard-boiled egg":{cal:160,pro:7,carb:22,fat:5,why:"Between nines. ~50 cents. Pack before you leave.",ing:[["1 banana",""],["1 hard-boiled egg","from Sunday prep"]],steps:["Pack before you leave.","Eat between 9th and 10th hole regardless of hunger.","32 oz water per 9 holes minimum in summer."],tip:"Cheapest and best on-course fuel.",grocery:{produce:["Bananas"],prep:["1 hard-boiled egg (from batch)"]}},
+  "Banana + protein bar":{cal:280,pro:14,carb:40,fat:8,why:"More substantial course fuel for a long back nine.",ing:[["1 banana",""],["1 protein bar","RXBAR or similar"]],steps:["Pack before you leave.","Eat between nines.","Drink water at every hole."],tip:"Keep a box of RXBARs in the car.",grocery:{produce:["Bananas"],pantry:["Protein bars (RXBAR or similar)"]}}
+};
+
+// ─── WEEKLY SCHEDULE ─────────────────────────────────────────────────────────
+const WEEK_START = new Date('2026-03-23T00:00:00');
+const DAYS = [
+  {short:"MON",name:"Monday",type:"gym",sub:"Strength training",workout:"🏋️  5:30pm · Kilimanjaro Level 10 · Goblet squat, RDL, Chest press, Rows, Pallof press, Lat pulldown, Face pulls",
+   meals:[{slot:"Lunch · 1:00pm",def:"Chicken rice bowl",eid:"i85uuheeubphbdr8gcc4frpf90",alts:["Burrito bowl","Tuna pasta","Big protein salad","Egg fried rice"]},{slot:"Snack · 4:00pm",def:"Greek yogurt + banana",eid:"a04k7qc33jg9fidtgjn56npkfs",alts:["Rice cakes + peanut butter","Hard-boiled eggs + apple"]},{slot:"Dinner · 7:30pm",def:"Ground beef stir-fry",eid:"brignn7kor5jrfprf1g9j4qsbk",alts:["Spaghetti meat sauce","Salmon patties","Shakshuka","Chicken thigh tacos","Pan-fried chicken thighs"]}]},
+  {short:"TUE",name:"Tuesday",type:"gym",sub:"Rotational power",workout:"🏋️  5:30pm · Kilimanjaro Level 10 · Cable woodchops, Pallof press with rotation, Step-ups, Single-leg RDL, Farmer's carry, Hip thrust",
+   meals:[{slot:"Lunch · 1:00pm",def:"Burrito bowl",eid:"l6amfuha4o67nf44ifmtb0vcqg",alts:["Chicken rice bowl","Tuna pasta","Egg fried rice","Big protein salad"]},{slot:"Snack · 4:00pm",def:"Rice cakes + peanut butter",eid:"a04k7qc33jg9fidtgjn56npkfs",alts:["Greek yogurt + banana","Hard-boiled eggs + apple"]},{slot:"Dinner · 7:30pm",def:"Chicken thigh tacos",eid:"brignn7kor5jrfprf1g9j4qsbk",alts:["Ground beef stir-fry","Pan-fried chicken thighs","Shakshuka","Salmon patties","Bean and beef chili"]}]},
+  {short:"WED",name:"Wednesday",type:"gym",sub:"Strength training",workout:"🏋️  5:30pm · Kilimanjaro Level 10 · Same as Monday. Make extra chili tonight — feeds Thursday lunch.",
+   meals:[{slot:"Lunch · 1:00pm",def:"Tuna pasta",eid:"k1iobl1jdgg0soefirte5uqvv0",alts:["Chicken rice bowl","Burrito bowl","Egg fried rice","Big protein salad"]},{slot:"Snack · 4:00pm",def:"Hard-boiled eggs + apple",eid:"a04k7qc33jg9fidtgjn56npkfs",alts:["Greek yogurt + banana","Rice cakes + peanut butter"]},{slot:"Dinner · 7:30pm",def:"Bean and beef chili",eid:"brignn7kor5jrfprf1g9j4qsbk",alts:["Spaghetti meat sauce","Pan-fried chicken thighs","Ground beef stir-fry","Shakshuka"]}]},
+  {short:"THU ⛳",name:"Thursday",type:"golf",sub:"Mobility + golf",workout:"🧘  Morning mobility · ⛳ Tee time ~5:00pm · Eat lunch 90 min before tee · 32 oz water per 9 holes",
+   meals:[{slot:"Lunch · 1:00pm",def:"Leftover chili + rice",eid:"8fpls5fhokmv3kdmg3nqfivk00",alts:["Chicken rice bowl","Burrito bowl"]},{slot:"Course fuel · between nines",def:"Banana + hard-boiled egg",eid:null,alts:["Banana + protein bar"]},{slot:"Dinner · after the round",def:"Pan-fried chicken thighs",eid:"brignn7kor5jrfprf1g9j4qsbk",alts:["Ground beef tacos","Chicken thigh tacos","Spaghetti meat sauce","Ground beef stir-fry"]}]},
+  {short:"FRI",name:"Friday",type:"gym",sub:"Rotational power",workout:"🏋️  5:30pm · Kilimanjaro Level 10 · Same as Tuesday. Make extra spaghetti — feeds Saturday lunch.",
+   meals:[{slot:"Lunch · 1:00pm",def:"Big protein salad",eid:"r0e9cophaggp7tr08odj7k0ick",alts:["Chicken rice bowl","Burrito bowl","Tuna pasta","Egg fried rice"]},{slot:"Snack · 4:00pm",def:"Greek yogurt + banana",eid:"a04k7qc33jg9fidtgjn56npkfs",alts:["Rice cakes + peanut butter","Hard-boiled eggs + apple"]},{slot:"Dinner · 7:30pm",def:"Spaghetti meat sauce",eid:"brignn7kor5jrfprf1g9j4qsbk",alts:["Salmon patties","Pan-fried chicken thighs","Shakshuka","Ground beef stir-fry","Chicken thigh tacos"]}]},
+  {short:"SAT",name:"Saturday",type:"rest",sub:"Active recovery",workout:"😴  Walk 18, neighborhood walk, or light movement. No gym.",
+   meals:[{slot:"Lunch · 1:00pm",def:"Big protein salad",eid:null,alts:["Leftover spaghetti","Chicken rice bowl","Tuna pasta"]},{slot:"Dinner · 6:00pm",def:"Whole roasted chicken",eid:"7bit5ltaumf5pdojeqomgnhqds",alts:["Pan-fried chicken thighs","Salmon patties","Shakshuka","Bean and beef chili"]}]},
+  {short:"SUN",name:"Sunday",type:"rest",sub:"Rest + prep",workout:"😴  Start soup stock first — simmers 2 hrs unattended. Then batch cook for the week.",
+   meals:[{slot:"Lunch · 1:00pm",def:"Leftover roasted chicken + salad",eid:null,alts:["Leftover spaghetti","Tuna pasta","Big protein salad"]},{slot:"Dinner · 7:00pm",def:"Chicken soup from the carcass",eid:"8hdhq0q49ice2pfv3vspn5g2f8",alts:["Shakshuka","Ground beef stir-fry","Chicken thigh tacos","Salmon patties"]}]}
+];
+
+// Daily nutrition targets
+const TARGETS = { cal: 2150, pro: 170, carb: 185, fat: 62 };
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let token = null;
+let curDay = 0;
+let curTab = 'plan';
+let ropen = DAYS.map(d => d.meals.map(() => false));
+let swaps = DAYS.map(d => d.meals.map(m => m.def));
+let eaten = DAYS.map(d => d.meals.map(() => null)); // null=unknown, true=ate, false=skipped
+let alcLog = {}; // { 'YYYY-MM-DD': count }
+let groceryChecked = {}; // { itemKey: true }
+let settings = { targetCal: 2150, targetPro: 170, targetCarb: 185, targetFat: 62 };
+
+const SK = 'ms_v3';
+
+function save() {
+  try { localStorage.setItem(SK, JSON.stringify({ swaps, eaten, alcLog, groceryChecked, settings })); } catch(e){}
+}
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(SK));
+    if (!d) return;
+    if (d.swaps?.length === swaps.length) swaps = d.swaps;
+    if (d.eaten?.length === eaten.length) eaten = d.eaten;
+    if (d.alcLog) alcLog = d.alcLog;
+    if (d.groceryChecked) groceryChecked = d.groceryChecked;
+    if (d.settings) settings = {...settings, ...d.settings};
+  } catch(e){}
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+function startAuth() {
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+    client_id: CLIENT_ID, redirect_uri: REDIRECT,
+    response_type: 'token', scope: SCOPES, prompt: 'consent'
+  });
+}
+
+// ─── CALENDAR API ─────────────────────────────────────────────────────────────
+async function patchEvent(eid, dayIdx, mealIdx, newName) {
+  if (!eid || !token) return true;
+  const r = M[newName]; if (!r) return false;
+  const m = DAYS[dayIdx].meals[mealIdx];
+  const ings = r.ing.map(([n,d])=>`• ${n}${d?' — '+d:''}`).join('\n');
+  const steps = r.steps.map((s,i)=>`${i+1}. ${s}`).join('\n');
+  const swapList = [m.def,...m.alts].filter(a=>a!==newName).map(a=>{ const ar=M[a]; return ar?`• ${a} (${ar.cal} cal, ${ar.pro}g protein)`:`• ${a}`; }).join('\n');
+  const desc = `📊 ${r.cal} cal · ${r.pro}g protein · ${r.carb}g carbs · ${r.fat}g fat\n\n─── RECIPE ───\nIngredients:\n${ings}\n\nMethod:\n${steps}\n\n💡 ${r.tip||''}\n\n─── SWAPS ───\n${swapList}`;
+  try {
+    const ev = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eid}`,{headers:{'Authorization':'Bearer '+token}}).then(r=>r.json());
+    if (ev.error) throw new Error(ev.error.message);
+    const occDate = new Date(WEEK_START); occDate.setDate(occDate.getDate() + dayIdx);
+    const origStart = ev.start?.dateTime ? new Date(ev.start.dateTime) : null;
+    let tMin = new Date(occDate), tMax = new Date(occDate);
+    if (origStart) { tMin.setHours(origStart.getHours()-1,0,0,0); tMax.setHours(origStart.getHours()+1,0,0,0); }
+    else { tMin.setHours(0,0,0,0); tMax.setHours(23,59,59,0); }
+    const instances = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eid}/instances?`+new URLSearchParams({timeMin:tMin.toISOString(),timeMax:tMax.toISOString(),maxResults:'5'}),{headers:{'Authorization':'Bearer '+token}}).then(r=>r.json());
+    if (instances.error) throw new Error(instances.error.message);
+    if (!instances.items?.length) throw new Error('No instance found');
+    const instance = instances.items[0];
+    const patch = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${instance.id}`,{method:'PATCH',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({summary:`🥪 Lunch — ${newName}`,description:desc})});
+    if (!patch.ok) { const e=await patch.json(); throw new Error(e.error?.message||'Patch failed'); }
+    return true;
+  } catch(e) { console.error(e); return false; }
+}
+
+// ─── SWAP ─────────────────────────────────────────────────────────────────────
+async function doSwap(di, mi, name) {
+  if (swaps[di][mi] === name) return;
+  const prev = swaps[di][mi];
+  swaps[di][mi] = name; save(); render();
+  showToast('Saving…', '');
+  const ok = await patchEvent(DAYS[di].meals[mi].eid, di, mi, name);
+  if (ok) showToast(`✓ ${name}`, 'ok');
+  else { swaps[di][mi] = prev; save(); render(); showToast('Calendar update failed', 'err'); }
+}
+
+// ─── MARK EATEN ───────────────────────────────────────────────────────────────
+function toggleEaten(di, mi) {
+  const cur = eaten[di][mi];
+  eaten[di][mi] = cur === true ? false : true;
+  save(); render();
+  if (curTab === 'history') renderHistory();
+}
+
+// ─── ALCOHOL ──────────────────────────────────────────────────────────────────
+function dateKey(offset) {
+  const d = new Date(WEEK_START); d.setDate(d.getDate() + offset);
+  return d.toISOString().split('T')[0];
+}
+function alcChange(dayOffset, delta) {
+  const k = dateKey(dayOffset);
+  alcLog[k] = Math.max(0, (alcLog[k] || 0) + delta);
+  save(); renderSettings();
+}
+
+// ─── GROCERY LIST ─────────────────────────────────────────────────────────────
+function buildGroceryList() {
+  const cats = {meat:[], produce:[], dairy:[], pantry:[], prep:[]};
+  const seen = {};
+  DAYS.forEach((d,di) => {
+    d.meals.forEach((m,mi) => {
+      const meal = M[swaps[di][mi]];
+      if (!meal?.grocery) return;
+      Object.entries(meal.grocery).forEach(([cat, items]) => {
+        items.forEach(item => {
+          if (!seen[item]) { seen[item] = true; if (cats[cat]) cats[cat].push(item); }
+        });
+      });
+    });
+  });
+  return cats;
+}
+
+function toggleGrocery(key) {
+  groceryChecked[key] = !groceryChecked[key];
+  save(); renderGrocery();
+}
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+function showTab(tab) {
+  curTab = tab;
+  ['plan','grocery','history','settings'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? (t==='plan'?'flex':'block') : 'none';
+  });
+  document.querySelectorAll('.nav-tab').forEach((b,i) => {
+    b.classList.toggle('active', ['plan','grocery','history','settings'][i] === tab);
+  });
+  if (tab==='grocery') renderGrocery();
+  if (tab==='history') renderHistory();
+  if (tab==='settings') renderSettings();
+}
+
+// ─── PLAN RENDER ─────────────────────────────────────────────────────────────
+function getTotal(di) {
+  let cal=0,pro=0,carb=0,fat=0,ok=true;
+  DAYS[di].meals.forEach((_,mi)=>{ const r=M[swaps[di][mi]]; if(!r?.cal){ok=false;return;} cal+=r.cal; pro+=r.pro; carb+=r.carb; fat+=r.fat; });
+  return ok?{cal,pro,carb,fat}:null;
+}
+
+function toggleRecipe(di,mi){ ropen[di][mi]=!ropen[di][mi]; render(); }
+
+function showDay(idx){
+  curDay=idx;
+  document.getElementById('hdrDay').textContent=DAYS[idx].name;
+  const dt=new Date(WEEK_START); dt.setDate(dt.getDate()+idx);
+  document.getElementById('hdrDate').textContent=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  document.querySelectorAll('.dpill').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  document.getElementById('scroll').scrollTop=0;
+  render();
+}
+
+function render(){
+  const d=DAYS[curDay]; const t=getTotal(curDay);
+  let h='';
+  h+=`<div class="workout">${d.workout}</div>`;
+  if(t){
+    h+=`<div class="totals"><div class="tc cal"><div class="n">${t.cal}</div><div class="l">cal</div></div><div class="tc pro"><div class="n">${t.pro}g</div><div class="l">protein</div></div><div class="tc carb"><div class="n">${t.carb}g</div><div class="l">carbs</div></div><div class="tc fat"><div class="n">${t.fat}g</div><div class="l">fat</div></div></div>`;
+    // Nutrition progress bars — eaten meals only
+    const eatTotals = {cal:0,pro:0,carb:0,fat:0};
+    let anyEaten = false;
+    d.meals.forEach((_,mi)=>{ if(eaten[curDay][mi]===true){ const r=M[swaps[curDay][mi]]; if(r){eatTotals.cal+=r.cal;eatTotals.pro+=r.pro;eatTotals.carb+=r.carb;eatTotals.fat+=r.fat;anyEaten=true;} }});
+    if(anyEaten){
+      const pct=(v,tgt)=>Math.min(100,Math.round(v/tgt*100));
+      const col=(v,tgt)=>v>tgt?'var(--amber)':v>tgt*.8?'var(--green)':'var(--blue)';
+      h+=`<div class="nut-progress">
+        ${[['cal',eatTotals.cal,settings.targetCal],['protein',eatTotals.pro,settings.targetPro],['carbs',eatTotals.carb,settings.targetCarb],['fat',eatTotals.fat,settings.targetFat]].map(([l,v,tgt])=>`
+        <div class="nut-row">
+          <div class="nut-label">${l}</div>
+          <div class="nut-bar-bg"><div class="nut-bar-fill" style="width:${pct(v,tgt)}%;background:${col(v,tgt)}"></div></div>
+          <div class="nut-val${v>tgt?' over':''}">${v}${l==='cal'?'':''} / ${tgt}</div>
+        </div>`).join('')}
+      </div>`;
+    }
+  }
+  d.meals.forEach((m,mi)=>{
+    const sel=swaps[curDay][mi]; const r=M[sel]||{};
+    const isSwapped=sel!==m.def; const isOpen=ropen[curDay][mi];
+    const hasR=r.steps?.length>0; const ateState=eaten[curDay][mi];
+    h+=`<div class="mcard${isOpen?' open':''}">
+      <div class="mhead">
+        <div class="mslot">${m.slot}</div>
+        <div class="mtoprow">
+          <div style="flex:1">
+            <div class="mname">${sel}${isSwapped?'<span class="swapped-dot"></span>':''}${ateState===true?'<span class="ate-dot"></span>':''}</div>
+            ${r.why?`<div class="mwhy">${r.why}</div>`:''}
+            ${r.cal?`<div class="mmacros"><span class="mtag cal">${r.cal} cal</span><span class="mtag pro">${r.pro}g</span><span class="mtag carb">${r.carb}g</span><span class="mtag fat">${r.fat}g</span></div>`:''}
+          </div>
+          <div class="mbtns">
+            <button class="xbtn ${ateState===true?'ate':ateState===false?'ate-no':''}" onclick="toggleEaten(${curDay},${mi})" title="${ateState===true?'Marked as eaten — tap to undo':'Mark as eaten'}">
+              ${ateState===true?'✓':ateState===false?'✗':'○'}
+            </button>
+            ${hasR?`<button class="xbtn${isOpen?' open':''}" onclick="toggleRecipe(${curDay},${mi})">${isOpen?'▲':'▼'}</button>`:''}
+          </div>
+        </div>
+      </div>`;
+    if(hasR&&isOpen){
+      h+=`<div class="rpanel open"><div class="rpin"><div class="rlabel">Ingredients</div><ul class="ilist">`;
+      r.ing.forEach(([n,d2])=>{h+=`<li><span class="in">${n}</span><span style="font-size:12px;color:var(--text3)">${d2}</span></li>`;});
+      h+=`</ul><div class="rlabel">Method</div><ol class="slist">`;
+      r.steps.forEach(s=>{h+=`<li>${s}</li>`;});
+      h+=`</ol>`;
+      if(r.tip) h+=`<div class="tip">💡 ${r.tip}</div>`;
+      h+=`</div></div>`;
+    }
+    if(m.alts?.length){
+      h+=`<div class="swapsec"><div class="swaplbl">Swap for</div><div class="swappills">`;
+      [m.def,...m.alts].forEach(a=>{ const ar=M[a]; const safe=a.replace(/'/g,"\\'"); h+=`<button class="spill${sel===a?' active':''}" onclick="doSwap(${curDay},${mi},'${safe}')">${a}${ar?` <span style="font-size:10px;opacity:.55;font-family:DM Mono,monospace">${ar.cal}</span>`:''}</button>`; });
+      h+=`</div></div>`;
+    }
+    h+=`</div>`;
+  });
+  document.getElementById('content').innerHTML=h;
+}
+
+// ─── GROCERY RENDER ───────────────────────────────────────────────────────────
+function renderGrocery(){
+  const list = buildGroceryList();
+  const catNames = {meat:'🥩 Meat & fish',produce:'🥦 Produce',dairy:'🥚 Dairy & eggs',pantry:'🥫 Pantry',prep:'📦 From Sunday prep'};
+  let h = `<div class="grocery-actions"><button class="gact-btn" onclick="clearGrocery()">Clear all checks</button><button class="gact-btn" onclick="checkAll()">Check all</button></div>`;
+  Object.entries(catNames).forEach(([cat, title]) => {
+    const items = list[cat];
+    if (!items?.length) return;
+    h += `<div class="grocery-section"><div class="gs-title">${title}</div>`;
+    items.forEach(item => {
+      const key = cat+'|'+item;
+      const checked = !!groceryChecked[key];
+      h += `<div class="gi${checked?' checked':''}" onclick="toggleGrocery('${key.replace(/'/g,"\\'")}')"><div class="gi-check"></div><div class="gi-name">${item}</div></div>`;
+    });
+    h += `</div>`;
+  });
+  document.getElementById('grocery-content').innerHTML = h;
+}
+
+function clearGrocery(){ groceryChecked={}; save(); renderGrocery(); }
+function checkAll(){
+  const list = buildGroceryList();
+  Object.entries(list).forEach(([cat,items])=>{ items.forEach(item=>{ groceryChecked[cat+'|'+item]=true; }); });
+  save(); renderGrocery();
+}
+
+// ─── HISTORY RENDER ───────────────────────────────────────────────────────────
+function renderHistory(){
+  let hasAny = false;
+  let h = '';
+  DAYS.forEach((d,di)=>{
+    const dayEaten = eaten[di].some(e=>e!==null);
+    if (!dayEaten) return;
+    hasAny = true;
+    const dt = new Date(WEEK_START); dt.setDate(dt.getDate()+di);
+    const dateStr = dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    h+=`<div class="hist-day"><div class="hist-day-head"><span class="hist-day-name">${d.name}</span><span class="hist-day-date">${dateStr}</span></div>`;
+    d.meals.forEach((m,mi)=>{
+      const ateState = eaten[di][mi];
+      if (ateState===null) return;
+      const sel = swaps[di][mi];
+      const r = M[sel];
+      h+=`<div class="hist-meal"><div><div class="hist-meal-name">${sel}</div><div class="hist-meal-slot">${m.slot}${r?` · ${r.cal} cal · ${r.pro}g protein`:''}</div></div><span class="hist-ate ${ateState?'yes':'no'}">${ateState?'ate':'skipped'}</span></div>`;
+    });
+    h+=`</div>`;
+  });
+  if (!hasAny) h = `<div class="empty-state">No history yet.<br>Tap the ○ button on any meal to mark it as eaten or skipped.</div>`;
+  document.getElementById('history-content').innerHTML = h;
+}
+
+// ─── SETTINGS RENDER ─────────────────────────────────────────────────────────
+function renderSettings(){
+  // Alcohol stats for the week
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let weekTotal = 0;
+  DAYS.forEach((_,i)=>{ weekTotal += (alcLog[dateKey(i)]||0); });
+  const weekAvg = weekTotal > 0 ? (weekTotal/7).toFixed(1) : '0';
+  const calFromAlc = weekTotal * 130; // ~130 cal per drink average
+
+  let h = '';
+
+  // Alcohol tracker
+  h += `<div class="alc-tracker">
+    <div class="alc-title">🍺 Alcohol tracker — this week</div>
+    <div class="alc-week">`;
+  DAYS.forEach((_,i)=>{
+    const count = alcLog[dateKey(i)]||0;
+    const cls = count>=10?'high':count>=5?'med':count>0?'low':'';
+    h+=`<div class="alc-day"><div class="alc-day-label">${dayNames[i]}</div><div class="alc-count ${cls}">${count}</div><div class="alc-btns"><button class="alc-btn" onclick="alcChange(${i},-1)">−</button><button class="alc-btn" onclick="alcChange(${i},1)">+</button></div></div>`;
+  });
+  h+=`</div>
+    <div class="alc-summary">
+      <div class="alc-stat"><div class="n ${weekTotal>=70?'red':weekTotal>=35?'amber':'green'}">${weekTotal}</div><div class="l">this week</div></div>
+      <div class="alc-stat"><div class="n ${parseFloat(weekAvg)>=10?'red':parseFloat(weekAvg)>=5?'amber':'green'}">${weekAvg}</div><div class="l">per night avg</div></div>
+      <div class="alc-stat"><div class="n ${calFromAlc>1000?'red':calFromAlc>500?'amber':'green'}">${calFromAlc.toLocaleString()}</div><div class="l">extra cals</div></div>
+    </div>
+  </div>`;
+
+  // Context note
+  const avgNum = parseFloat(weekAvg);
+  let alcNote = '';
+  if (avgNum >= 10) alcNote = `At ${weekAvg} drinks/night, fat loss is extremely limited — alcohol suppresses fat metabolism and adds ${calFromAlc.toLocaleString()} extra calories this week alone.`;
+  else if (avgNum >= 5) alcNote = `At ${weekAvg} drinks/night you're making progress. Getting below 4–5 would significantly accelerate fat loss results.`;
+  else if (avgNum > 0) alcNote = `At ${weekAvg} drinks/night you're in a much better range. The workouts and nutrition plan are working effectively at this level.`;
+  if (alcNote) h += `<div class="tip" style="margin-bottom:12px">💡 ${alcNote}</div>`;
+
+  // Nutrition targets
+  h += `<div class="settings-section"><div class="settings-title">Daily nutrition targets</div>`;
+  [['targetCal','Calories','cal'],['targetPro','Protein','g'],['targetCarb','Carbs','g'],['targetFat','Fat','g']].forEach(([key,label,unit])=>{
+    h+=`<div class="setting-row"><div><div class="setting-label">${label}</div><div class="setting-sub">Current: ${settings[key]}${unit}</div></div><input class="setting-input" type="number" id="set-${key}" value="${settings[key]}"></div>`;
+  });
+  h+=`<button class="save-btn" onclick="saveSettings()">Save targets</button></div>`;
+
+  // Meal plan info
+  h += `<div class="settings-section"><div class="settings-title">About this plan</div>
+    <div class="setting-row"><div class="setting-label">Plan start</div><div class="setting-val">Mar 23, 2026</div></div>
+    <div class="setting-row"><div class="setting-label">Duration</div><div class="setting-val">16 weeks</div></div>
+    <div class="setting-row"><div class="setting-label">Goal</div><div class="setting-val">180 lbs / 15% BF</div></div>
+    <div class="setting-row"><div class="setting-label">Next check-in</div><div class="setting-val">Apr 20, 2026</div></div>
+  </div>`;
+
+  // Disconnect button
+  h += `<div class="settings-section"><div class="settings-title">Account</div>
+    <div class="setting-row"><div class="setting-label">Google Calendar</div><div class="setting-val" style="color:var(--green)">Connected ✓</div></div>
+  </div>
+  <button class="save-btn" style="background:var(--red-dim);border-color:var(--red);color:var(--red)" onclick="disconnect()">Disconnect & sign out</button>`;
+
+  document.getElementById('settings-content').innerHTML = h;
+}
+
+function saveSettings(){
+  ['targetCal','targetPro','targetCarb','targetFat'].forEach(key=>{
+    const el = document.getElementById('set-'+key);
+    if (el) settings[key] = parseInt(el.value)||settings[key];
+  });
+  save(); renderSettings(); showToast('Targets saved ✓','ok');
+}
+
+function disconnect(){
+  sessionStorage.removeItem('ms_token');
+  token = null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth').style.display='flex';
+}
+
+// ─── APP INIT ─────────────────────────────────────────────────────────────────
+function buildDayBar(){
+  const bar=document.getElementById('daybar'); bar.innerHTML='';
+  DAYS.forEach((d,i)=>{ const b=document.createElement('button'); b.className=`dpill ${d.type}`; b.textContent=d.short; b.onclick=()=>showDay(i); bar.appendChild(b); });
+}
+
+function showApp(){
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').style.display='flex';
+  load();
+  buildDayBar();
+  const dow=new Date().getDay();
+  showDay(dow===0?6:dow-1);
+}
+
+let toastT=null;
+function showToast(msg,type){ const t=document.getElementById('toast'); t.textContent=msg; t.className='show '+(type||''); if(toastT) clearTimeout(toastT); toastT=setTimeout(()=>{t.className='';},2200); }
+
+(function init(){
+  const hash=window.location.hash.substring(1);
+  if(hash){ const p=new URLSearchParams(hash); const t=p.get('access_token'); if(t){ token=t; sessionStorage.setItem('ms_token',t); window.history.replaceState(null,null,window.location.pathname); showApp(); return; } }
+  const saved=sessionStorage.getItem('ms_token');
+  if(saved){ token=saved; showApp(); return; }
+  document.getElementById('auth').style.display='flex';
+  document.getElementById('app').style.display='none';
+})();
+</script>
+</body>
+</html>
