@@ -574,7 +574,7 @@ async function patchEvent(eid,dayIdx,mealIdx,newName){
     const instances=await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eid}/instances?`+new URLSearchParams({timeMin:tMin.toISOString(),timeMax:tMax.toISOString(),maxResults:'5'}),{headers:{'Authorization':'Bearer '+token}}).then(r=>r.json());
     if(instances.error) throw new Error(instances.error.message);
     if(!instances.items?.length) throw new Error('No instance found');
-    const patch=await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${instances.items[0].id}`,{method:'PATCH',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({summary:`🥪 Lunch — ${newName}`,description:desc})});
+    const patch=await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${instances.items[0].id}`,{method:'PATCH',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({summary:(m.slot.includes('Dinner')?'🍽️ Dinner':m.slot.includes('Snack')?'🍎 Snack':'🥪 Lunch')+' — '+newName,description:desc})});
     if(!patch.ok){const e=await patch.json();throw new Error(e.error?.message||'Patch failed');}
     return true;
   }catch(e){console.error(e);return false;}
@@ -595,7 +595,7 @@ function toggleEaten(di,mi){
   const cur=eaten[di][mi];
   eaten[di][mi]=cur===true?false:cur===false?null:true;
   save(); render();
-  if(curTab==='history') renderHistory();
+  if(curTab==='analyze') renderAnalyze();
 }
 
 // ─── DAILY TOTALS ─────────────────────────────────────────────────────────────
@@ -641,20 +641,25 @@ async function logFood(){
     const st=eaten[curDay][mi]===true?'eaten':eaten[curDay][mi]===false?'skipped':'not yet eaten';
     return `${m.slot}: ${swaps[curDay][mi]} (${r?.cal||0} cal, ${r?.pro||0}g protein) — ${st}`;
   }).join('\n');
-  const prompt=`You are a nutrition assistant helping someone track food intake.
-Today is ${DAYS[curDay].name}. Daily targets: ${settings.targetCal} cal, ${settings.targetPro}g protein, ${settings.targetCarb}g carbs, ${settings.targetFat}g fat.
-Remaining budget: ${budget.calR} cal, ${budget.proR}g protein, ${budget.carbR}g carbs, ${budget.fatR}g fat.
-Today's planned meals:\n${plannedMeals}
-They just ate or are about to eat: "${val}"
-Respond ONLY with valid JSON (no markdown, no backticks):
-{"name":"display name","cal":number,"pro":number,"carb":number,"fat":number,"notes":"1-2 sentences about this food vs their goals","recommendations":[{"meal":"which upcoming slot","action":"what to change","reason":"why"}]}
-For recommendations: if significantly off-plan suggest 1-2 specific adjustments to remaining meals. If on-track, provide 1 positive note. Keep practical and specific to their plan.`;
+  const prompt=
+    'You are a nutrition assistant helping someone track food intake.\n'+
+    'Today is '+DAYS[curDay].name+'. Daily targets: '+settings.targetCal+' cal, '+settings.targetPro+'g protein, '+settings.targetCarb+'g carbs, '+settings.targetFat+'g fat.\n'+
+    'Remaining budget: '+budget.calR+' cal, '+budget.proR+'g protein, '+budget.carbR+'g carbs, '+budget.fatR+'g fat.\n'+
+    'Planned meals today:\n'+plannedMeals+'\n'+
+    'They just ate or are about to eat: "'+val+'"\n'+
+    'Respond ONLY with valid JSON (no markdown, no backticks):\n'+
+    '{"name":"display name","cal":number,"pro":number,"carb":number,"fat":number,"notes":"1-2 sentences about this food vs their goals","recommendations":[{"meal":"which upcoming slot","action":"what to change","reason":"why"}]}\n'+
+    'If significantly off-plan suggest 1-2 adjustments to remaining meals. If on-track provide 1 positive note. Be specific to their plan.';
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
-    const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
+    if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
+    const rawText=data.content?.[0]?.text||'';
+    if(!rawText) throw new Error('Empty response from API');
+    const parsed=JSON.parse(rawText.replace(/```json|```/g,'').trim());
+    if(!parsed.name||!parsed.cal) throw new Error('API response missing required fields. Raw: '+rawText.slice(0,200));
     if(!foodLog[curDay]) foodLog[curDay]=[];
-    foodLog[curDay].push({name:parsed.name,cal:parsed.cal,pro:parsed.pro,carb:parsed.carb,fat:parsed.fat,input:val,time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
+    foodLog[curDay].push({name:parsed.name,cal:parsed.cal,pro:parsed.pro||0,carb:parsed.carb||0,fat:parsed.fat||0,input:val,time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
     save();
     const recs=parsed.recommendations||[];
     let h=`<div class="ai-result-name">✓ Logged: ${parsed.name}</div>
@@ -696,9 +701,14 @@ async function logWorkout(){
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
-    const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
+    if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
+    const rawText=data.content?.[0]?.text||'';
+    if(!rawText) throw new Error('Empty response from API');
+    const parsed=JSON.parse(rawText.replace(/```json|```/g,'').trim());
+    if(!parsed.summary) throw new Error('API response missing summary field. Raw: '+rawText.slice(0,200));
+    const logEntry={summary:parsed.summary,completed:parsed.completed||[],skipped:parsed.skipped||[],modifications:parsed.modifications||[],notes:parsed.notes||'',input:val,time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})};
     if(!workoutLog[curDay]) workoutLog[curDay]=[];
-    workoutLog[curDay].push({summary:parsed.summary,completed:parsed.completed||[],skipped:parsed.skipped||[],modifications:parsed.modifications||[],notes:parsed.notes,input:val,time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
+    workoutLog[curDay].push(logEntry);
     save();
     let h=`<div class="ai-result-name">✓ ${parsed.summary}</div>`;
     if(parsed.completed?.length) h+=`<div class="ai-section-label" style="color:var(--green)">Completed</div>${parsed.completed.map(e=>`<div style="font-size:13px;color:var(--text2);padding:3px 0">✓ ${e}</div>`).join('')}`;
@@ -718,16 +728,36 @@ async function logWorkout(){
 
 function deleteWorkoutItem(di,idx){if(workoutLog[di]) workoutLog[di].splice(idx,1);save();renderWorkout();}
 
+function workoutNavDay(delta){
+  let newDay=curDay+delta;
+  if(newDay<0){weekOffset--;newDay=6;updateWeekNav();buildDayBar();}
+  else if(newDay>6){weekOffset++;newDay=0;updateWeekNav();buildDayBar();}
+  curDay=newDay;
+  // Keep Plan tab header in sync
+  const hd=document.getElementById('hdrDay');
+  const hdt=document.getElementById('hdrDate');
+  if(hd) hd.textContent=DAYS[curDay].name;
+  if(hdt){const dt=new Date(getWeekStart());dt.setDate(dt.getDate()+curDay);hdt.textContent=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+  renderWorkout();
+}
+
+function workoutNavToDay(di){
+  curDay=di;
+  renderWorkout();
+}
+
 // ─── RENDER PLAN ──────────────────────────────────────────────────────────────
 function toggleRecipe(di,mi){ropen[di][mi]=!ropen[di][mi];render();}
 
 function showDay(idx){
   curDay=idx;
-  document.getElementById('hdrDay').textContent=DAYS[idx].name;
-  const dt=new Date(WEEK_START);dt.setDate(dt.getDate()+idx);
-  document.getElementById('hdrDate').textContent=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const hd=document.getElementById('hdrDay');
+  const hdt=document.getElementById('hdrDate');
+  if(hd) hd.textContent=DAYS[idx].name;
+  if(hdt){const dt=new Date(getWeekStart());dt.setDate(dt.getDate()+idx);hdt.textContent=dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
   document.querySelectorAll('.dpill').forEach((b,i)=>b.classList.toggle('active',i===idx));
-  document.getElementById('scroll').scrollTop=0;
+  const sc=document.getElementById('scroll');if(sc) sc.scrollTop=0;
+  updateWeekNav();
   render();
 }
 
@@ -735,7 +765,7 @@ function render(){
   const d=DAYS[curDay];
   const planned=getPlannedTotals(curDay);
   const actual=getActualTotals(curDay);
-  const hasActivity=eaten[curDay].some(e=>e!==null)||(foodLog[curDay]||[]).length>0;
+  const hasActivity=eaten[curDay].some(e=>e!==null)||(foodLog[curDay]||[]).length>0||(alcLog[dateKey(curDay)]||0)>0;
   let h='';
   h+=`<div class="workout">${d.workout}</div>`;
   if(planned){
@@ -861,14 +891,17 @@ async function analyzeWeek(){
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
-    const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
-    earnedReport={...parsed,weekScore:ws,generated:new Date().toISOString()};
+    if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
+    const rawText=data.content?.[0]?.text||'';
+    if(!rawText) throw new Error('Empty response');
+    const parsed=JSON.parse(rawText.replace(/```json|```/g,'').trim());
+    earnedReport={...parsed,weekScore:ws,weekOffset,generated:new Date().toISOString()};
     save();
     showToast(parsed.earned?'You earned it! 🎉':'Keep pushing 💪','ok');
-    renderLog();
+    if(curTab==='analyze') renderAnalyze(); else renderLog();
   }catch(e){
-    console.error(e);
-    showToast('Could not analyze week — try again','err');
+    console.error('analyzeWeek error:',e);
+    showToast('Analysis failed: '+e.message.slice(0,50),'err');
   }
   if(btn){btn.disabled=false;btn.textContent='🏆 Check if I earned a cheat meal';}
 }
@@ -1038,7 +1071,7 @@ Only include days where meaningful adjustments are needed (1 day for minor overa
     const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
     const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
-    recoveryPlan={dayIdx:di,generated:new Date().toISOString(),...parsed};
+    recoveryPlan={dayIdx:di,weekOffset,generated:new Date().toISOString(),...parsed};
     save();
     showToast('Recovery plan ready ✓','ok');
     renderLog();
@@ -1701,9 +1734,11 @@ function getCurrentWeekOffset(){
 function shiftWeek(delta){
   weekOffset+=delta;
   monthViewMode=false;
+  // Clear plans that belong to previous week
+  if(recoveryPlan&&recoveryPlan.weekOffset!==undefined&&recoveryPlan.weekOffset!==weekOffset){recoveryPlan=null;}
+  if(earnedReport&&earnedReport.weekOffset!==undefined&&earnedReport.weekOffset!==weekOffset){earnedReport=null;}
   updateWeekNav();
   buildDayBar();
-  // Keep same day index but update header
   showDay(curDay);
 }
 
