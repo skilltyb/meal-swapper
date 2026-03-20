@@ -358,7 +358,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
       <button class="nav-tab" onclick="showTab('workout')">Workout</button>
       <button class="nav-tab" onclick="showTab('analyze')">Analyze</button>
       <button class="nav-tab" onclick="showTab('grocery')">Grocery</button>
-      <button class="nav-tab" onclick="showTab('history')">History</button>
       <button class="nav-tab" onclick="showTab('settings')">Settings</button>
     </div>
 
@@ -606,6 +605,8 @@ function getActualTotals(di){
     if(eaten[di][mi]===true){const r=M[swaps[di][mi]];if(r){cal+=r.cal;pro+=r.pro;carb+=r.carb;fat+=r.fat;}}
   });
   (foodLog[di]||[]).forEach(f=>{cal+=f.cal;pro+=f.pro;carb+=f.carb;fat+=f.fat;});
+  // Alcohol: ~130 cal per drink, negligible protein/carbs/fat
+  cal+=(alcLog[dateKey(di)]||0)*130;
   return{cal,pro,carb,fat};
 }
 
@@ -663,8 +664,9 @@ For recommendations: if significantly off-plan suggest 1-2 specific adjustments 
     resultEl.innerHTML=h; resultEl.classList.add('show');
     input.value=''; render(); renderLog(); showToast('Logged ✓','ok');
   }catch(e){
-    resultEl.innerHTML=`<div style="color:var(--red);font-size:13px">Couldn't parse — try being more specific, e.g. "large Big Mac meal with medium fries" or "4 cups microwave popcorn".</div>`;
-    resultEl.classList.add('show'); showToast('Try being more specific','err');
+    console.error('Food log error:', e);
+    resultEl.innerHTML=`<div style="color:var(--red);font-size:13px">Error: ${e.message||'Unknown error'}. Check browser console for details.</div>`;
+    resultEl.classList.add('show'); showToast('Log failed — see error','err');
   }
   btn.disabled=false; thinking.classList.remove('show');
 }
@@ -707,8 +709,9 @@ async function logWorkout(){
     resultEl.innerHTML=h; resultEl.classList.add('show');
     input.value=''; renderWorkout(); showToast('Workout logged ✓','ok');
   }catch(e){
-    resultEl.innerHTML=`<div style="color:var(--red);font-size:13px">Couldn't parse — try something like "did all sets, squats 3×12 at 50 lbs, skipped face pulls".</div>`;
-    resultEl.classList.add('show'); showToast('Try being more specific','err');
+    console.error('Workout log error:', e);
+    resultEl.innerHTML=`<div style="color:var(--red);font-size:13px">Error: ${e.message||'Unknown error'}. Check browser console for details.</div>`;
+    resultEl.classList.add('show'); showToast('Log failed — see error','err');
   }
   btn.disabled=false; thinking.classList.remove('show');
 }
@@ -1153,6 +1156,35 @@ function renderLog(){
     h+=`<div class="tc ${cls}"><div class="n" style="${over?'color:var(--amber)':''}">${over?'+'+Math.abs(v):v}${u==='cal'?'':u}</div><div class="l">${over?'over':l.toLowerCase()}</div></div>`;
   });
   h+=`</div>`;
+  // Alcohol tracker
+  const dayNames2=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let weekTotal2=0;
+  DAYS.forEach((_,i)=>{weekTotal2+=(alcLog[dateKey(i)]||0);});
+  const weekAvg2=weekTotal2>0?(weekTotal2/7).toFixed(1):'0';
+  const calFromAlc2=weekTotal2*130;
+  const avgNum2=parseFloat(weekAvg2);
+  let alcNote2='';
+  if(avgNum2>=10) alcNote2='At '+weekAvg2+' drinks/night, fat loss is extremely limited — alcohol suppresses fat metabolism and adds '+calFromAlc2.toLocaleString()+' extra calories this week alone.';
+  else if(avgNum2>=5) alcNote2='At '+weekAvg2+' drinks/night you\'re making progress. Getting below 4–5 would significantly accelerate results.';
+  else if(avgNum2>0) alcNote2='At '+weekAvg2+' drinks/night you\'re in a good range. The plan is working effectively at this level.';
+
+  h+=`<div class="alc-tracker" style="margin-bottom:14px">
+    <div class="alc-title">🍺 Alcohol — this week</div>
+    <div class="alc-week">`;
+  DAYS.forEach((_,i)=>{
+    const count=alcLog[dateKey(i)]||0;
+    const cls=count>=10?'high':count>=5?'med':count>0?'low':'';
+    h+=`<div class="alc-day"><div class="alc-day-label">${dayNames2[i]}</div><div class="alc-count ${cls}">${count}</div><div class="alc-btns"><button class="alc-btn" onclick="alcChange(${i},-1)">−</button><button class="alc-btn" onclick="alcChange(${i},1)">+</button></div></div>`;
+  });
+  h+=`</div>
+    <div class="alc-summary">
+      <div class="alc-stat"><div class="n ${weekTotal2>=70?'red':weekTotal2>=35?'amber':'green'}">${weekTotal2}</div><div class="l">this week</div></div>
+      <div class="alc-stat"><div class="n ${avgNum2>=10?'red':avgNum2>=5?'amber':'green'}">${weekAvg2}</div><div class="l">per night</div></div>
+      <div class="alc-stat"><div class="n ${calFromAlc2>1000?'red':calFromAlc2>500?'amber':'green'}">${calFromAlc2.toLocaleString()}</div><div class="l">extra cal</div></div>
+    </div>
+    ${alcNote2?`<div class="tip" style="margin-top:10px">💡 ${alcNote2}</div>`:''}
+  </div>`;
+
   h+=`<div class="ai-box">
     <div class="ai-box-title">🤖 Log any food</div>
     <div class="ai-desc">Type anything you ate — McDonald's order, a snack, drinks, a cheat meal. I'll estimate the macros and recommend how to adjust the rest of your day.</div>
@@ -1409,6 +1441,38 @@ function renderAnalyze(){
   // Result area for full analysis
   h+=`<div id="analyze-plan-result" style="display:none"></div>`;
 
+  // ── HISTORY ──
+  h+=`<div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">`;
+  h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:10px">📋 History</div>`;
+  let hasAnyHist=false;
+  DAYS.forEach((d,di)=>{
+    const hasData=eaten[di].some(e=>e!==null)||(foodLog[di]||[]).length>0||(workoutLog[di]||[]).length>0;
+    if(!hasData) return;
+    hasAnyHist=true;
+    const dt=new Date(getWeekStart());dt.setDate(dt.getDate()+di);
+    const actual=getActualTotals(di);
+    h+=`<div class="hist-day"><div class="hist-day-head"><span class="hist-day-name">${d.name}</span><span class="hist-day-date">${dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></div>`;
+    h+=`<div class="hist-day-totals"><span class="hist-macro" style="background:var(--surface2);color:var(--text2)">${actual.cal} cal</span><span class="hist-macro" style="background:var(--blue-dim);color:var(--blue)">${actual.pro}g pro</span><span class="hist-macro" style="background:var(--amber-dim);color:var(--amber)">${actual.carb}g carbs</span><span class="hist-macro" style="background:var(--green-dim);color:var(--green)">${actual.fat}g fat</span></div>`;
+    d.meals.forEach((m,mi)=>{
+      const ateState=eaten[di][mi];if(ateState===null) return;
+      const sel=swaps[di][mi];const r=M[sel];
+      h+=`<div class="hist-meal"><div><div class="hist-meal-name">${sel}</div><div class="hist-meal-slot">${m.slot}${r?' · '+r.cal+' cal · '+r.pro+'g pro':''}</div></div><span class="hist-ate ${ateState?'yes':'no'}">${ateState?'ate':'skipped'}</span></div>`;
+    });
+    if((foodLog[di]||[]).length){
+      h+=`<div class="hist-logged">`;
+      (foodLog[di]||[]).forEach(f=>{h+=`<div class="hist-logged-item"><span style="color:var(--purple)">📝 ${f.name}</span><span style="font-family:'DM Mono',monospace">${f.cal} cal · ${f.pro}g pro</span></div>`;});
+      h+=`</div>`;
+    }
+    if((workoutLog[di]||[]).length){
+      h+=`<div class="hist-logged">`;
+      (workoutLog[di]||[]).forEach(w=>{h+=`<div class="hist-logged-item"><span style="color:var(--blue)">🏋️ ${w.summary}</span><span style="font-family:'DM Mono',monospace;font-size:11px">${w.time}</span></div>`;});
+      h+=`</div>`;
+    }
+    h+=`</div>`;
+  });
+  if(!hasAnyHist) h+=`<div class="empty-state">No history yet this week.<br>Mark meals eaten, log food, and log workouts to build history.</div>`;
+  h+=`</div>`;
+
   document.getElementById('analyze-content').innerHTML=h;
 }
 
@@ -1577,21 +1641,8 @@ function renderHistory(){
 function dateKey(offset){const d=getWeekStart();d.setDate(d.getDate()+offset);return d.toISOString().split('T')[0];}
 function alcChange(dayOffset,delta){const k=dateKey(dayOffset);alcLog[k]=Math.max(0,(alcLog[k]||0)+delta);save();renderSettings();}
 function renderSettings(){
-  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  let weekTotal=0;
-  DAYS.forEach((_,i)=>{weekTotal+=(alcLog[dateKey(i)]||0);});
-  const weekAvg=weekTotal>0?(weekTotal/7).toFixed(1):'0';
-  const calFromAlc=weekTotal*130;
   let h='';
-  h+=`<div class="alc-tracker"><div class="alc-title">🍺 Alcohol tracker — this week</div><div class="alc-week">`;
-  DAYS.forEach((_,i)=>{const count=alcLog[dateKey(i)]||0;const cls=count>=10?'high':count>=5?'med':count>0?'low':'';h+=`<div class="alc-day"><div class="alc-day-label">${dayNames[i]}</div><div class="alc-count ${cls}">${count}</div><div class="alc-btns"><button class="alc-btn" onclick="alcChange(${i},-1)">−</button><button class="alc-btn" onclick="alcChange(${i},1)">+</button></div></div>`;});
-  h+=`</div><div class="alc-summary"><div class="alc-stat"><div class="n ${weekTotal>=70?'red':weekTotal>=35?'amber':'green'}">${weekTotal}</div><div class="l">this week</div></div><div class="alc-stat"><div class="n ${parseFloat(weekAvg)>=10?'red':parseFloat(weekAvg)>=5?'amber':'green'}">${weekAvg}</div><div class="l">per night avg</div></div><div class="alc-stat"><div class="n ${calFromAlc>1000?'red':calFromAlc>500?'amber':'green'}">${calFromAlc.toLocaleString()}</div><div class="l">extra cals</div></div></div></div>`;
-  const avgNum=parseFloat(weekAvg);
-  let alcNote='';
-  if(avgNum>=10) alcNote=`At ${weekAvg} drinks/night, fat loss is extremely limited — alcohol suppresses fat metabolism and adds ${calFromAlc.toLocaleString()} extra calories this week alone.`;
-  else if(avgNum>=5) alcNote=`At ${weekAvg} drinks/night you're making progress. Getting below 4–5 would significantly accelerate fat loss results.`;
-  else if(avgNum>0) alcNote=`At ${weekAvg} drinks/night you're in a much better range. The workouts and nutrition plan are working effectively at this level.`;
-  if(alcNote) h+=`<div class="tip" style="margin-bottom:12px">💡 ${alcNote}</div>`;
+  // Alcohol tracker moved to Food tab
   h+=`<div class="settings-section"><div class="settings-title">Daily nutrition targets</div>`;
   [['targetCal','Calories','cal'],['targetPro','Protein','g'],['targetCarb','Carbs','g'],['targetFat','Fat','g']].forEach(([key,label,unit])=>{h+=`<div class="setting-row"><div><div class="setting-label">${label}</div><div class="setting-sub">Current: ${settings[key]}${unit}</div></div><input class="setting-input" type="number" id="set-${key}" value="${settings[key]}"></div>`;});
   h+=`<button class="save-btn" onclick="saveSettings()">Save targets</button></div>`;
@@ -1606,13 +1657,12 @@ function disconnect(){sessionStorage.removeItem('ms_token');token=null;document.
 // ─── TAB SWITCHING ────────────────────────────────────────────────────────────
 function showTab(tab){
   curTab=tab;
-  ['plan','log','workout','analyze','grocery','history','settings'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===tab?(t==='plan'?'flex':'block'):'none';});
-  document.querySelectorAll('.nav-tab').forEach((b,i)=>{b.classList.toggle('active',['plan','log','workout','analyze','grocery','history','settings'][i]===tab);});
+  ['plan','log','workout','analyze','grocery','settings'].forEach(t=>{const el=document.getElementById('tab-'+t);if(el) el.style.display=t===tab?(t==='plan'?'flex':'block'):'none';});
+  document.querySelectorAll('.nav-tab').forEach((b,i)=>{b.classList.toggle('active',['plan','log','workout','analyze','grocery','settings'][i]===tab);});
   if(tab==='log') renderLog();
   if(tab==='workout') renderWorkout();
   if(tab==='analyze') renderAnalyze();
   if(tab==='grocery') renderGrocery();
-  if(tab==='history') renderHistory();
   if(tab==='settings') renderSettings();
 }
 
