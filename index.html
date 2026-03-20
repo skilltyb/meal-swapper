@@ -30,6 +30,39 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .connect-btn:hover{background:var(--green);color:var(--bg)}
 .info-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:12px;color:var(--text2);line-height:1.7;max-width:320px;text-align:left}
 .info-box strong{color:var(--text)}
+/* Week nav */
+.week-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
+.week-nav-btn{background:none;border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.week-nav-btn:hover{border-color:var(--text3);color:var(--text)}
+.week-nav-label{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;text-align:center;flex:1;cursor:pointer;padding:4px 8px;border-radius:var(--radius-sm);transition:all .15s}
+.week-nav-label:hover{background:var(--surface);color:var(--text)}
+.week-nav-label.month-active{color:var(--amber);background:var(--amber-dim)}
+.today-btn{background:var(--surface2);border:1px solid var(--border2);color:var(--text3);padding:4px 10px;border-radius:20px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;margin-left:8px;transition:all .15s;white-space:nowrap}
+.today-btn:hover{border-color:var(--green);color:var(--green)}
+.dpill.today{position:relative}
+.dpill.today::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:4px;height:4px;background:var(--green);border-radius:50%}
+
+/* Month view */
+.month-view{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:12px}
+.month-dow{text-align:center;font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;padding:4px 0}
+.month-day{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 4px;min-height:58px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.month-day:hover{border-color:var(--border2);background:var(--surface2)}
+.month-day.other-month{opacity:.35}
+.month-day.today{border-color:var(--green)!important;background:var(--green-dim)}
+.month-day.plan-week{border-color:var(--blue);border-style:solid}
+.month-day.selected{border-color:var(--amber)!important;background:var(--amber-dim)}
+.md-num{font-size:11px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:3px}
+.month-day.today .md-num{color:var(--green)}
+.month-day.selected .md-num{color:var(--amber)}
+.md-dots{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:2px}
+.md-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.md-dot.gym{background:var(--blue)}.md-dot.golf{background:var(--amber)}.md-dot.rest{background:var(--green)}.md-dot.meal{background:var(--text3)}.md-dot.cheat{background:var(--red)}.md-dot.workout{background:var(--purple)}
+.md-label{font-size:8px;color:var(--text3);line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.month-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;padding:8px 12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border)}
+.ml-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+.ml-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
 #nav{display:flex;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
 .nav-tab{flex:1;padding:11px 2px;font-size:10px;font-weight:600;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:'DM Mono',monospace;letter-spacing:.5px;text-transform:uppercase}
 .nav-tab.active{color:var(--green);border-bottom-color:var(--green)}
@@ -323,6 +356,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
       <button class="nav-tab active" onclick="showTab('plan')">Plan</button>
       <button class="nav-tab" onclick="showTab('log')">Food</button>
       <button class="nav-tab" onclick="showTab('workout')">Workout</button>
+      <button class="nav-tab" onclick="showTab('analyze')">Analyze</button>
       <button class="nav-tab" onclick="showTab('grocery')">Grocery</button>
       <button class="nav-tab" onclick="showTab('history')">History</button>
       <button class="nav-tab" onclick="showTab('settings')">Settings</button>
@@ -335,8 +369,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
         <div class="dn" id="hdrDay">Monday</div>
         <div class="ds" id="hdrDate">Mar 23</div>
       </div>
+      <div class="week-nav" id="week-nav">
+        <button class="week-nav-btn" onclick="shiftWeek(-1)">‹</button>
+        <span class="week-nav-label" id="week-nav-label" onclick="toggleMonthView()">Week of Mar 23</span>
+        <button class="today-btn" onclick="goToToday()" id="today-btn">Today</button>
+        <button class="week-nav-btn" onclick="shiftWeek(1)">›</button>
+      </div>
       <div id="daybar"></div>
       <div id="scroll"><div id="content"></div></div>
+      <div class="month-view" id="month-view" style="display:none"><div id="month-content"></div></div>
     </div>
 
     <!-- FOOD LOG TAB -->
@@ -347,6 +388,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     <!-- WORKOUT TAB -->
     <div id="tab-workout" style="display:none;flex:1;overflow-y:auto;padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom))">
       <div id="workout-content"></div>
+    </div>
+
+    <!-- ANALYZE TAB -->
+    <div id="tab-analyze" style="display:none;flex:1;overflow-y:auto;padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom))">
+      <div id="analyze-content"></div>
     </div>
 
     <!-- GROCERY TAB -->
@@ -399,7 +445,18 @@ const M = {
   "Banana + protein bar":{cal:280,pro:14,carb:40,fat:8,why:"More substantial course fuel for a long back nine.",ing:[["1 banana",""],["1 protein bar","RXBAR or similar"]],steps:["Pack before you leave.","Eat between nines.","Drink water at every hole."],tip:"Keep a box of RXBARs in the car.",grocery:{produce:["Bananas"],pantry:["Protein bars (RXBAR or similar)"]}}
 };
 
-const WEEK_START = new Date('2026-03-23T00:00:00');
+const PLAN_START = new Date('2026-03-23T00:00:00'); // first week of the plan
+let weekOffset = 0; // 0 = plan week 1, 1 = plan week 2, etc.
+let monthViewMode = false;
+let monthViewDate = new Date(); // month being shown in month view
+
+function getWeekStart() {
+  const d = new Date(PLAN_START);
+  d.setDate(d.getDate() + weekOffset * 7);
+  return d;
+}
+// Keep WEEK_START as alias for compatibility with existing code
+Object.defineProperty(window, 'WEEK_START', { get: getWeekStart });
 const DAYS = [
   {short:"MON",name:"Monday",type:"gym",sub:"Strength training",workout:"🏋️  5:30pm · Kilimanjaro Level 10 · Goblet squat, RDL, Chest press, Rows, Pallof press, Lat pulldown, Face pulls",
    meals:[{slot:"Lunch · 1:00pm",def:"Chicken rice bowl",eid:"i85uuheeubphbdr8gcc4frpf90",alts:["Burrito bowl","Tuna pasta","Big protein salad","Egg fried rice"]},{slot:"Snack · 4:00pm",def:"Greek yogurt + banana",eid:"a04k7qc33jg9fidtgjn56npkfs",alts:["Rice cakes + peanut butter","Hard-boiled eggs + apple"]},{slot:"Dinner · 7:30pm",def:"Ground beef stir-fry",eid:"brignn7kor5jrfprf1g9j4qsbk",alts:["Spaghetti meat sauce","Salmon patties","Shakshuka","Chicken thigh tacos","Pan-fried chicken thighs"]}]},
@@ -592,7 +649,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 {"name":"display name","cal":number,"pro":number,"carb":number,"fat":number,"notes":"1-2 sentences about this food vs their goals","recommendations":[{"meal":"which upcoming slot","action":"what to change","reason":"why"}]}
 For recommendations: if significantly off-plan suggest 1-2 specific adjustments to remaining meals. If on-track, provide 1 positive note. Keep practical and specific to their plan.`;
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
     const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
     if(!foodLog[curDay]) foodLog[curDay]=[];
@@ -635,7 +692,7 @@ async function logWorkout(){
     '{"summary":"brief 1-line description","completed":["exercises completed"],"skipped":["exercises skipped"],"modifications":["any modifications — lighter weight, fewer sets, etc."],"notes":"1-2 sentences of honest coach feedback — acknowledge what they did, briefly note what was missed if anything, keep it encouraging but honest","recommendations":[{"title":"short title","detail":"specific recommendation for next session or rest of week"}]}\n'+
     'Keep it practical and specific. If they crushed it, say so. If they skipped a lot, acknowledge it without being harsh. Recommendations should be actionable.';
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
     const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
     if(!workoutLog[curDay]) workoutLog[curDay]=[];
@@ -799,7 +856,7 @@ async function analyzeWeek(){
     'If not earned (score < 55), still include cheatMeal but explain in why what they need to hit first.';
 
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
     const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
     earnedReport={...parsed,weekScore:ws,generated:new Date().toISOString()};
@@ -975,7 +1032,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 Only include days where meaningful adjustments are needed (1 day for minor overages, 2 days for a full cheat day).`;
 
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
     const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
     recoveryPlan={dayIdx:di,generated:new Date().toISOString(),...parsed};
@@ -1148,6 +1205,220 @@ function renderWorkout(){
   document.getElementById('workout-content').innerHTML=h;
 }
 
+// ─── ANALYZE TAB ─────────────────────────────────────────────────────────────
+async function analyzeFullPlan(){
+  const btn=document.getElementById('analyze-plan-btn');
+  if(btn){btn.disabled=true;btn.textContent='Analyzing…';}
+  const resultEl=document.getElementById('analyze-plan-result');
+  if(resultEl) resultEl.style.display='none';
+
+  // Build complete week picture
+  const weekSummary=DAYS.map((d,di)=>{
+    const actual=getActualTotals(di);
+    const planned=getPlannedTotals(di);
+    const wl=workoutLog[di]||[];
+    const fl=foodLog[di]||[];
+    const alc=alcLog[dateKey(di)]||0;
+    const ateCount=eaten[di].filter(e=>e===true).length;
+    const skippedCount=eaten[di].filter(e=>e===false).length;
+    return d.name+': planned '+(planned?planned.cal+' cal':'-')+', actual '+actual.cal+' cal, '+actual.pro+'g protein, ate '+ateCount+'/'+d.meals.length+' meals'+(skippedCount?' ('+skippedCount+' skipped)':'')+(wl.length?' | workout: '+wl[0].summary:' | no workout')+(fl.length?' | extra: '+fl.map(f=>f.name).join(', '):'')+(alc?' | '+alc+' drinks':'');
+  }).join('\n');
+
+  const ws=getWeekScore();
+  const workoutDetail=DAYS.map((d,di)=>{
+    const wl=workoutLog[di]||[];
+    if(!wl.length&&d.type==='gym') return d.name+': MISSED';
+    if(!wl.length) return d.name+': '+d.type;
+    return d.name+': '+wl.map(w=>{
+      const skipped=w.skipped?.length?', skipped: '+w.skipped.join(', '):'';
+      const mods=w.modifications?.length?', modified: '+w.modifications.join(', '):'';
+      return w.summary+skipped+mods;
+    }).join('; ');
+  }).join('\n');
+
+  const prompt='You are a fitness coach doing a comprehensive weekly review for a 41-year-old golfer trying to get from 200 lbs/30% body fat to 180 lbs/15% body fat.\n\n'+
+    'Daily targets: '+settings.targetCal+' cal, '+settings.targetPro+'g protein, '+settings.targetCarb+'g carbs, '+settings.targetFat+'g fat.\n\n'+
+    'WEEK NUTRITION SUMMARY:\n'+weekSummary+'\n\n'+
+    'WORKOUT SUMMARY:\n'+workoutDetail+'\n\n'+
+    'WEEK SCORE: '+ws.score+'/100 | Workouts: '+ws.workoutsCompleted+'/'+ws.workoutsPlanned+' ('+ws.workoutRate+'%) | Bonus sessions: '+ws.twoADays+' | Avg deficit: '+ws.avgDeficit+' cal | Alcohol: '+ws.alcPerNight+' drinks/night\n\n'+
+    'CURRENT PLAN:\n'+DAYS.map((d,di)=>d.name+': '+d.meals.map((m,mi)=>swaps[di][mi]).join(' | ')).join('\n')+'\n\n'+
+    'Give a comprehensive honest analysis. Respond ONLY with valid JSON (no markdown, no backticks):\n'+
+    '{'+
+    '"overallGrade":"A/B/C/D/F",'+
+    '"headline":"1 sentence summary of the week",'+
+    '"nutritionAnalysis":"2-3 sentences on calorie and protein adherence",'+
+    '"workoutAnalysis":"2-3 sentences on workout quality and consistency",'+
+    '"alcoholImpact":"1-2 sentences on alcohol impact or positive note if low",'+
+    '"topWins":["specific things they did well — be concrete"],'+
+    '"adjustments":[{"type":"meal|workout|habit","day":"which day","current":"what it is now","change":"what to change it to","reason":"why this helps"}],'+
+    '"nextWeekFocus":["2-3 specific priorities — actionable and measurable"],'+
+    '"projectedProgress":"honest assessment of whether on track for 180lb/15%BF goal at current pace"'+
+    '}';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await resp.json();
+    const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
+
+    const gradeColor={'A':'var(--green)','B':'var(--green)','C':'var(--amber)','D':'var(--red)','F':'var(--red)'}[parsed.overallGrade]||'var(--text2)';
+    let h=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="font-size:40px;font-weight:700;font-family:'DM Mono',monospace;color:${gradeColor}">${parsed.overallGrade||'?'}</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.3">${parsed.headline||''}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">Week score: ${ws.score}/100</div>
+        </div>
+      </div>
+      ${parsed.nutritionAnalysis?`<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:8px;padding-top:8px;border-top:1px solid var(--border)">🥗 ${parsed.nutritionAnalysis}</div>`:''}
+      ${parsed.workoutAnalysis?`<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:8px">🏋️ ${parsed.workoutAnalysis}</div>`:''}
+      ${parsed.alcoholImpact?`<div style="font-size:13px;color:var(--text2);line-height:1.5">🍺 ${parsed.alcoholImpact}</div>`:''}
+    </div>`;
+
+    if(parsed.topWins?.length){
+      h+=`<div class="settings-section" style="margin-bottom:12px"><div class="settings-title" style="color:var(--green)">✓ Wins this week</div><div style="padding:10px 14px">`;
+      parsed.topWins.forEach(w=>{h+=`<div style="font-size:13px;color:var(--text2);padding:4px 0;line-height:1.4">✓ ${w}</div>`;});
+      h+=`</div></div>`;
+    }
+
+    if(parsed.adjustments?.length){
+      h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--amber);font-family:'DM Mono',monospace;margin-bottom:8px">⚡ Recommended adjustments</div>`;
+      parsed.adjustments.forEach(a=>{
+        const typeColor=a.type==='meal'?'var(--blue)':a.type==='workout'?'var(--purple)':'var(--amber)';
+        h+=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span style="font-size:10px;padding:2px 7px;border-radius:20px;font-family:'DM Mono',monospace;background:var(--surface2);color:${typeColor}">${a.type}</span>
+            <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${a.day||''}</span>
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Currently: ${a.current||''}</div>
+          <div style="font-size:13px;color:var(--text);font-weight:500;margin-bottom:4px">→ ${a.change||''}</div>
+          <div style="font-size:12px;color:var(--text3);line-height:1.4">${a.reason||''}</div>
+        </div>`;
+      });
+    }
+
+    if(parsed.nextWeekFocus?.length){
+      h+=`<div class="settings-section" style="margin-bottom:12px"><div class="settings-title" style="color:var(--blue)">→ Next week priorities</div><div style="padding:10px 14px">`;
+      parsed.nextWeekFocus.forEach((f,i)=>{h+=`<div style="font-size:13px;color:var(--text2);padding:4px 0;line-height:1.4">${i+1}. ${f}</div>`;});
+      h+=`</div></div>`;
+    }
+
+    if(parsed.projectedProgress){
+      h+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:12px">
+        <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:5px">Goal progress check</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.5">${parsed.projectedProgress}</div>
+      </div>`;
+    }
+
+    if(resultEl){resultEl.innerHTML=h;resultEl.style.display='block';}
+  }catch(e){
+    console.error(e);
+    if(resultEl){resultEl.innerHTML=`<div style="color:var(--red);font-size:13px;padding:12px">Analysis failed. Make sure you have some meals and workouts logged this week first.</div>`;resultEl.style.display='block';}
+  }
+  if(btn){btn.disabled=false;btn.textContent='🔍 Analyze my week';}
+}
+
+function renderAnalyze(){
+  const ws=getWeekScore();
+  const hasData=ws.daysLogged>0;
+  let h='';
+
+  // Week at a glance header
+  const scoreColor=ws.score>=70?'var(--green)':ws.score>=55?'var(--amber)':'var(--red)';
+  h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:10px">This week</div>`;
+  h+=`<div class="totals" style="margin-bottom:12px">
+    <div class="tc cal"><div class="n" style="color:${scoreColor}">${ws.score}</div><div class="l">score</div></div>
+    <div class="tc pro"><div class="n" style="color:${ws.workoutRate>=100?'var(--green)':ws.workoutRate>=75?'var(--amber)':'var(--red)'}">${ws.workoutsCompleted}/${ws.workoutsPlanned}</div><div class="l">workouts</div></div>
+    <div class="tc carb"><div class="n" style="color:${ws.avgDeficit>100?'var(--green)':ws.avgDeficit>0?'var(--amber)':'var(--red)'}">${ws.avgDeficit>0?'-'+ws.avgDeficit:'+'+Math.abs(ws.avgDeficit)}</div><div class="l">cal/day</div></div>
+    <div class="tc fat"><div class="n" style="color:${parseFloat(ws.alcPerNight)<3?'var(--green)':parseFloat(ws.alcPerNight)<6?'var(--amber)':'var(--red)'}">${ws.alcPerNight}</div><div class="l">drinks/night</div></div>
+  </div>`;
+
+  // Quick workout status this week
+  h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px">Workout status</div>`;
+  h+=`<div class="settings-section" style="margin-bottom:12px">`;
+  DAYS.forEach((d,di)=>{
+    if(d.type==='rest') return;
+    const wl=workoutLog[di]||[];
+    const done=wl.length>0;
+    const status=done?'✓ '+wl[0].summary:'—';
+    const statusColor=done?'var(--green)':'var(--text3)';
+    const hasSkips=done&&(wl[0].skipped?.length>0);
+    h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:13px;color:var(--text);font-weight:500">${d.name}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${d.sub}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;color:${statusColor};font-family:'DM Mono',monospace">${done?'✓':'○'}</div>
+        ${hasSkips?`<div style="font-size:10px;color:var(--amber)">some skipped</div>`:''}
+      </div>
+    </div>`;
+  });
+  h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 14px">
+    <div style="font-size:13px;color:var(--text)">Bonus sessions</div>
+    <div style="font-size:13px;font-family:'DM Mono',monospace;color:${ws.twoADays>0?'var(--green)':'var(--text3)'}">${ws.twoADays>0?'+'+ws.twoADays+' 💪':'None yet'}</div>
+  </div></div>`;
+
+  // Section: Full AI Analysis
+  h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px">AI analysis & adjustments</div>`;
+  h+=`<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px">The AI will review your full week — nutrition, workouts, alcohol, sleep quality — and give you a letter grade, specific meal and workout adjustments, and next week's priorities.</div>`;
+  h+=`<button style="width:100%;padding:13px;background:var(--blue-dim);border:1px solid var(--blue);color:var(--blue);border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;margin-bottom:12px;transition:all .2s" id="analyze-plan-btn" onclick="analyzeFullPlan()" ${!hasData?'disabled':''}>🔍 Analyze my week</button>`;
+  if(!hasData) h+=`<div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:12px">Log some meals and workouts first to get a meaningful analysis.</div>`;
+
+  // Section: Recovery plan
+  h+=`<div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px">`;
+  h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--red);font-family:'DM Mono',monospace;margin-bottom:8px">⚡ Recovery plan</div>`;
+  h+=`<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px">Had a rough day — missed the gym, cheat meal, too many drinks? Generate a recovery plan that adjusts tomorrow's meals and adds a makeup workout to your calendar.</div>`;
+  h+=`<div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px">Which day needs recovering?</div>`;
+  h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">`;
+  DAYS.forEach((d,di)=>{
+    const actual=getActualTotals(di);
+    const surplus=actual.cal-settings.targetCal;
+    const alc=alcLog[dateKey(di)]||0;
+    const noGym=d.type==='gym'&&!(workoutLog[di]||[]).length;
+    const hasIssue=surplus>300||alc>=5||noGym;
+    h+=`<button style="padding:6px 12px;border-radius:20px;border:1px solid ${hasIssue?'var(--red)':'var(--border2)'};background:${hasIssue?'var(--red-dim)':'var(--surface2)'};color:${hasIssue?'var(--red)':'var(--text2)'};font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s" onclick="triggerRecovery(${di})">${d.short}${hasIssue?' ⚡':''}</button>`;
+  });
+  h+=`</div>`;
+  if(recoveryPlan){
+    h+=`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:8px;font-size:13px;color:var(--text2)">Recovery plan active for ${DAYS[recoveryPlan.dayIdx]?.name}. <span style="color:var(--blue);cursor:pointer" onclick="showTab('log')">View in Food tab →</span></div>`;
+  }
+  h+=`</div>`;
+
+  // Section: Earned cheat meal
+  h+=`<div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;margin-bottom:12px">`;
+  h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);font-family:'DM Mono',monospace;margin-bottom:8px">🏆 Did I earn a cheat meal?</div>`;
+  h+=`<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px">Had a strong week? Hit your workouts, stayed under calories, kept alcohol low? Let the AI decide if you've earned a treat — and exactly what it should be.</div>`;
+  if(earnedReport){
+    const earned=earnedReport.earned;
+    h+=`<div style="background:${earned?'var(--green-dim)':'var(--surface2)'};border:1px solid ${earned?'var(--green)':'var(--border)'};border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:600;color:${earned?'var(--green)':'var(--text2)'};margin-bottom:4px">${earned?'🏆 You earned it!':'📈 Not quite yet'}</div>
+      <div style="font-size:13px;color:var(--text2)">${earnedReport.verdict||''}</div>
+      ${earnedReport.cheatMeal?.name?`<div style="font-size:12px;color:var(--text3);margin-top:6px">Suggested: ${earnedReport.cheatMeal.emoji||''} ${earnedReport.cheatMeal.name}</div>`:''}
+    </div>`;
+    h+=`<div style="display:flex;gap:8px;margin-bottom:8px">`;
+    h+=`<button style="flex:1;padding:9px;background:var(--green-dim);border:1px solid var(--green);color:var(--green);border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace" onclick="showTab('log')">See full report →</button>`;
+    h+=`<button style="flex:1;padding:9px;background:none;border:1px solid var(--border2);color:var(--text3);border-radius:var(--radius-sm);font-size:12px;cursor:pointer;font-family:'DM Mono',monospace" onclick="earnedReport=null;save();renderAnalyze()">Clear</button>`;
+    h+=`</div>`;
+  }
+  h+=`<button class="week-check-btn" id="week-check-btn" onclick="analyzeWeek()" style="width:100%;padding:11px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;margin-bottom:12px;transition:all .2s">🏆 Check if I earned a cheat meal</button>`;
+  h+=`</div>`;
+
+  // Result area for full analysis
+  h+=`<div id="analyze-plan-result" style="display:none"></div>`;
+
+  document.getElementById('analyze-content').innerHTML=h;
+}
+
+function triggerRecovery(di){
+  // Switch to food tab and generate recovery plan for this day
+  curDay=di;
+  showTab('log');
+  setTimeout(()=>generateRecoveryPlan(di),100);
+}
+
 // ─── PANTRY & GROCERY ─────────────────────────────────────────────────────────
 const PANTRY_CATS=['Meat & fish','Produce','Dairy & eggs','Pantry staples','Leftovers','Other'];
 let activePantryCat='Pantry staples';
@@ -1194,7 +1465,7 @@ Respond ONLY with valid JSON (no markdown, no backticks):
 For swapDay: 0=Mon,1=Tue,2=Wed,3=Thu,4=Fri,5=Sat,6=Sun. Pick most appropriate day.
 For swapMealIdx: 0=first meal, 1=second meal, 2=third meal of that day.`;
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
     const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'[]');
     suggestions=parsed;
@@ -1303,7 +1574,7 @@ function renderHistory(){
 }
 
 // ─── RENDER SETTINGS ──────────────────────────────────────────────────────────
-function dateKey(offset){const d=new Date(WEEK_START);d.setDate(d.getDate()+offset);return d.toISOString().split('T')[0];}
+function dateKey(offset){const d=getWeekStart();d.setDate(d.getDate()+offset);return d.toISOString().split('T')[0];}
 function alcChange(dayOffset,delta){const k=dateKey(dayOffset);alcLog[k]=Math.max(0,(alcLog[k]||0)+delta);save();renderSettings();}
 function renderSettings(){
   const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -1335,18 +1606,250 @@ function disconnect(){sessionStorage.removeItem('ms_token');token=null;document.
 // ─── TAB SWITCHING ────────────────────────────────────────────────────────────
 function showTab(tab){
   curTab=tab;
-  ['plan','log','workout','grocery','history','settings'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===tab?(t==='plan'?'flex':'block'):'none';});
-  document.querySelectorAll('.nav-tab').forEach((b,i)=>{b.classList.toggle('active',['plan','log','workout','grocery','history','settings'][i]===tab);});
+  ['plan','log','workout','analyze','grocery','history','settings'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===tab?(t==='plan'?'flex':'block'):'none';});
+  document.querySelectorAll('.nav-tab').forEach((b,i)=>{b.classList.toggle('active',['plan','log','workout','analyze','grocery','history','settings'][i]===tab);});
   if(tab==='log') renderLog();
   if(tab==='workout') renderWorkout();
+  if(tab==='analyze') renderAnalyze();
   if(tab==='grocery') renderGrocery();
   if(tab==='history') renderHistory();
   if(tab==='settings') renderSettings();
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-function buildDayBar(){const bar=document.getElementById('daybar');bar.innerHTML='';DAYS.forEach((d,i)=>{const b=document.createElement('button');b.className=`dpill ${d.type}`;b.textContent=d.short;b.onclick=()=>showDay(i);bar.appendChild(b);});}
-function showApp(){document.getElementById('auth').style.display='none';document.getElementById('app').style.display='flex';load();buildDayBar();const dow=new Date().getDay();showDay(dow===0?6:dow-1);}
+function buildDayBar(){
+  const bar=document.getElementById('daybar');bar.innerHTML='';
+  const todayDi=getTodayDayIndex();
+  DAYS.forEach((d,i)=>{
+    const b=document.createElement('button');
+    b.className='dpill '+d.type+(i===todayDi&&weekOffset===getCurrentWeekOffset()?' today':'');
+    b.textContent=d.short;
+    b.onclick=()=>showDay(i);
+    bar.appendChild(b);
+  });
+}
+
+function getTodayDayIndex(){
+  const today=new Date();
+  const dow=today.getDay(); // 0=Sun
+  return dow===0?6:dow-1; // 0=Mon..6=Sun
+}
+
+function getCurrentWeekOffset(){
+  // How many weeks from PLAN_START is this week
+  const today=new Date();
+  today.setHours(0,0,0,0);
+  const planMon=new Date(PLAN_START);
+  // Go back to Monday of current week
+  const dow=today.getDay();
+  const thisMon=new Date(today);
+  thisMon.setDate(today.getDate()-(dow===0?6:dow-1));
+  const diff=Math.round((thisMon-planMon)/(7*24*60*60*1000));
+  return diff;
+}
+
+function shiftWeek(delta){
+  weekOffset+=delta;
+  monthViewMode=false;
+  updateWeekNav();
+  buildDayBar();
+  // Keep same day index but update header
+  showDay(curDay);
+}
+
+function goToToday(){
+  weekOffset=getCurrentWeekOffset();
+  monthViewMode=false;
+  updateWeekNav();
+  buildDayBar();
+  showDay(getTodayDayIndex());
+}
+
+function updateWeekNav(){
+  const ws=getWeekStart();
+  const we=new Date(ws);we.setDate(we.getDate()+6);
+  const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const label=document.getElementById('week-nav-label');
+  const todayBtn=document.getElementById('today-btn');
+  if(label){
+    if(monthViewMode){
+      label.textContent=monthViewDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+      label.classList.add('month-active');
+    } else {
+      label.textContent=fmt(ws)+' – '+fmt(we);
+      label.classList.remove('month-active');
+    }
+  }
+  // Show/hide today button
+  if(todayBtn) todayBtn.style.display=weekOffset===getCurrentWeekOffset()&&!monthViewMode?'none':'block';
+  // Show/hide daybar and scroll vs month view
+  const daybar=document.getElementById('daybar');
+  const scroll=document.getElementById('scroll');
+  const mv=document.getElementById('month-view');
+  if(monthViewMode){
+    if(daybar) daybar.style.display='none';
+    if(scroll) scroll.style.display='none';
+    if(mv) mv.style.display='block';
+    renderMonthView();
+  } else {
+    if(daybar) daybar.style.display='flex';
+    if(scroll) scroll.style.display='block';
+    if(mv) mv.style.display='none';
+  }
+}
+
+function toggleMonthView(){
+  monthViewMode=!monthViewMode;
+  if(monthViewMode){
+    // Show month containing current week
+    monthViewDate=new Date(getWeekStart());
+    monthViewDate.setDate(1);
+  }
+  updateWeekNav();
+}
+
+function renderMonthView(){
+  const mv=document.getElementById('month-content');
+  if(!mv) return;
+  const year=monthViewDate.getFullYear();
+  const month=monthViewDate.getMonth();
+  const today=new Date();today.setHours(0,0,0,0);
+  const ws=getWeekStart();
+
+  // First day of month, last day of month
+  const firstDay=new Date(year,month,1);
+  const lastDay=new Date(year,month+1,0);
+  // Start grid on Monday before first of month
+  const startDow=firstDay.getDay(); // 0=Sun
+  const startOffset=startDow===0?-6:1-startDow; // days to go back to reach Monday
+  const gridStart=new Date(firstDay);
+  gridStart.setDate(firstDay.getDate()+startOffset);
+
+  const dows=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let h='';
+
+  // Month navigation
+  h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <button class="week-nav-btn" onclick="shiftMonth(-1)">‹</button>
+    <div style="font-size:14px;font-weight:600;color:var(--text)">${firstDay.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>
+    <button class="week-nav-btn" onclick="shiftMonth(1)">›</button>
+  </div>`;
+
+  // Legend
+  h+=`<div class="month-legend">
+    <div class="ml-item"><div class="ml-dot" style="background:var(--green);border:1px solid var(--green)"></div>Today</div>
+    <div class="ml-item"><div class="ml-dot" style="background:var(--surface2);border:1px solid var(--blue)"></div>Plan week</div>
+    <div class="ml-item"><div class="ml-dot gym"></div>Gym</div>
+    <div class="ml-item"><div class="ml-dot golf"></div>Golf</div>
+    <div class="ml-item"><div class="ml-dot workout"></div>Logged workout</div>
+    <div class="ml-item"><div class="ml-dot cheat"></div>Cheat food</div>
+  </div>`;
+
+  // Day of week headers
+  h+=`<div class="month-grid">`;
+  dows.forEach(d=>{h+=`<div class="month-dow">${d}</div>`;});
+
+  // Build 6 weeks of days
+  const cur=new Date(gridStart);
+  for(let i=0;i<42;i++){
+    const isThisMonth=cur.getMonth()===month;
+    const isToday=cur.getTime()===today.getTime();
+    // Is this day in current plan week?
+    const planWeekEnd=new Date(ws);planWeekEnd.setDate(ws.getDate()+6);
+    const inPlanWeek=cur>=ws&&cur<=planWeekEnd;
+    // What day of the week is this? (0=Mon..6=Sun)
+    const dow=cur.getDay()===0?6:cur.getDay()-1;
+    // Is this the selected day in current week?
+    const isSelected=inPlanWeek&&dow===curDay;
+
+    // Get data for this day if it's in the plan week
+    let dots='';
+    let miniLabel='';
+    if(inPlanWeek){
+      const d=DAYS[dow];
+      if(d.type==='gym') dots+=`<div class="md-dot gym"></div>`;
+      else if(d.type==='golf') dots+=`<div class="md-dot golf"></div>`;
+      else dots+=`<div class="md-dot rest"></div>`;
+      if((workoutLog[dow]||[]).length) dots+=`<div class="md-dot workout"></div>`;
+      if((foodLog[dow]||[]).length) dots+=`<div class="md-dot cheat"></div>`;
+      miniLabel=d.meals[0]?swaps[dow][0].split(' ')[0]:'';
+    }
+    // Check if any meals eaten or logged for past days
+    const isPast=cur<today&&inPlanWeek;
+
+    const classes=['month-day',!isThisMonth?'other-month':'',isToday?'today':'',inPlanWeek&&!isToday?'plan-week':'',isSelected?'selected':''].filter(Boolean).join(' ');
+
+    const dateStr=cur.toISOString().split('T')[0];
+    const clickHandler=inPlanWeek?`showDayFromMonth(${dow})`:`showMonthWeek('${dateStr}')`;
+
+    h+=`<div class="${classes}" onclick="${clickHandler}">
+      <div class="md-num">${cur.getDate()}</div>
+      ${dots?`<div class="md-dots">${dots}</div>`:''}
+      ${miniLabel?`<div class="md-label">${miniLabel}</div>`:''}
+    </div>`;
+    cur.setDate(cur.getDate()+1);
+  }
+  h+=`</div>`;
+
+  // Quick summary of plan week below
+  h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px">Plan week — ${getWeekStart().toLocaleDateString('en-US',{month:'short',day:'numeric'})} to ${(()=>{const e=new Date(getWeekStart());e.setDate(e.getDate()+6);return e.toLocaleDateString('en-US',{month:'short',day:'numeric'});})()}</div>`;
+  DAYS.forEach((d,di)=>{
+    const dt=new Date(getWeekStart());dt.setDate(dt.getDate()+di);
+    const isT=dt.toISOString().split('T')[0]===today.toISOString().split('T')[0];
+    h+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="showDayFromMonth(${di})">
+      <div style="width:36px;font-size:11px;font-family:'DM Mono',monospace;color:${isT?'var(--green)':'var(--text3)'}">
+        ${d.short.slice(0,3)}${isT?' ●':''}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;color:var(--text);font-weight:500">${swaps[di][0]}</div>
+        <div style="font-size:11px;color:var(--text3)">${d.meals.length>1?swaps[di][1]:''}</div>
+      </div>
+      <div style="font-size:11px;font-family:'DM Mono',monospace;color:${d.type==='gym'?'var(--blue)':d.type==='golf'?'var(--amber)':'var(--text3)'}">
+        ${d.type==='gym'?d.sub.split(' ')[0]:d.type==='golf'?'⛳':d.sub.split('+')[1]?.trim()||'Rest'}
+      </div>
+    </div>`;
+  });
+
+  mv.innerHTML=h;
+}
+
+function shiftMonth(delta){
+  monthViewDate=new Date(monthViewDate.getFullYear(),monthViewDate.getMonth()+delta,1);
+  renderMonthView();
+}
+
+function showDayFromMonth(di){
+  monthViewMode=false;
+  updateWeekNav();
+  buildDayBar();
+  showDay(di);
+}
+
+function showMonthWeek(dateStr){
+  // Navigate plan week to contain this date, then exit month view
+  const target=new Date(dateStr);
+  const planStart=new Date(PLAN_START);
+  const dow=target.getDay()===0?6:target.getDay()-1;
+  // Find Monday of target's week
+  const targetMon=new Date(target);
+  targetMon.setDate(target.getDate()-dow);
+  const diff=Math.round((targetMon-planStart)/(7*24*60*60*1000));
+  weekOffset=diff;
+  monthViewMode=false;
+  updateWeekNav();
+  buildDayBar();
+  showDay(dow);
+}
+function showApp(){
+  document.getElementById('auth').style.display='none';
+  document.getElementById('app').style.display='flex';
+  load();
+  // Auto-navigate to current week
+  weekOffset=getCurrentWeekOffset();
+  buildDayBar();
+  updateWeekNav();
+  showDay(getTodayDayIndex());
+}
 let toastT=null;
 function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='show '+(type||'');if(toastT) clearTimeout(toastT);toastT=setTimeout(()=>{t.className='';},2200);}
 (function init(){
