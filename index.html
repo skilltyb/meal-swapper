@@ -519,28 +519,43 @@ function getDayWorkoutType(di){
 let token=null, curDay=0, curTab='plan';
 let ropen=DAYS.map(d=>d.meals.map(()=>false));
 let swaps=DAYS.map(d=>d.meals.map(m=>m.def));
-let eaten=DAYS.map(d=>d.meals.map(()=>null));
-let foodLog={};    // {dayIdx:[{name,cal,pro,carb,fat,input,time}]}
-let pantry={};     // {itemName: category} — what's already in the house
-let suggestions=[]; // current AI suggestions
-let recoveryPlan=null; // {dayIdx, totalExtraCal, totalExtraPro, days:[{dayIdx,name,meals:[],workout,calTarget,proTarget}]}
-let earnedReport=null; // weekly performance + cheat meal suggestions
+// Per-week state keyed by weekOffset so Mon-23 and Mon-30 are separate
+let eatenByWeek={};      // {'0':[[null,null,null],...], '1':...}
+let foodLogByWeek={};    // {'0':{0:[...],1:[...]}, '1':...}
+let workoutLogByWeek={}; // {'0':{0:[...],1:[...]}, '1':...}
+let alcLogByWeek={};     // {'0':{'2026-03-23':3,...}, '1':...}
+let pantry={};
+let suggestions=[];
+let recoveryPlan=null;
+let earnedReport=null;
+
+// Accessors — always return current week's data
+function getEaten(){const k=String(weekOffset);if(!eatenByWeek[k])eatenByWeek[k]=DAYS.map(d=>d.meals.map(()=>null));return eatenByWeek[k];}
+function getFoodLog(){const k=String(weekOffset);if(!foodLogByWeek[k])foodLogByWeek[k]={};return foodLogByWeek[k];}
+function getWorkoutLog(){const k=String(weekOffset);if(!workoutLogByWeek[k])workoutLogByWeek[k]={};return workoutLogByWeek[k];}
+function getAlcLog(){const k=String(weekOffset);if(!alcLogByWeek[k])alcLogByWeek[k]={};return alcLogByWeek[k];}
 let workoutLog={}; // {dayIdx:[{summary,completed,skipped,modifications,notes,time}]}
 let alcLog={};
 let groceryChecked={};
 let settings={targetCal:2150,targetPro:170,targetCarb:185,targetFat:62};
 const SK='ms_v4';
 
-function save(){try{localStorage.setItem(SK,JSON.stringify({swaps,eaten,foodLog,workoutLog,alcLog,groceryChecked,pantry,recoveryPlan,earnedReport,settings}));}catch(e){}}
+function save(){try{localStorage.setItem(SK,JSON.stringify({swaps,eatenByWeek,foodLogByWeek,workoutLogByWeek,alcLogByWeek,groceryChecked,pantry,recoveryPlan,earnedReport,settings}));}catch(e){}}
 function load(){
   try{
     const d=JSON.parse(localStorage.getItem(SK));
     if(!d) return;
     if(d.swaps?.length===swaps.length) swaps=d.swaps;
-    if(d.eaten?.length===eaten.length) eaten=d.eaten;
-    if(d.foodLog) foodLog=d.foodLog;
-    if(d.workoutLog) workoutLog=d.workoutLog;
-    if(d.alcLog) alcLog=d.alcLog;
+    // New per-week keyed format
+    if(d.eatenByWeek) eatenByWeek=d.eatenByWeek;
+    if(d.foodLogByWeek) foodLogByWeek=d.foodLogByWeek;
+    if(d.workoutLogByWeek) workoutLogByWeek=d.workoutLogByWeek;
+    if(d.alcLogByWeek) alcLogByWeek=d.alcLogByWeek;
+    // Legacy migration: if old format exists, import it as week 0
+    if(d.eaten&&!d.eatenByWeek) eatenByWeek['0']=d.eaten;
+    if(d.foodLog&&!d.foodLogByWeek) foodLogByWeek['0']=d.foodLog;
+    if(d.workoutLog&&!d.workoutLogByWeek) workoutLogByWeek['0']=d.workoutLog;
+    if(d.alcLog&&!d.alcLogByWeek) alcLogByWeek['0']=d.alcLog;
     if(d.groceryChecked) groceryChecked=d.groceryChecked;
     if(d.pantry) pantry=d.pantry;
     if(d.recoveryPlan) recoveryPlan=d.recoveryPlan;
@@ -592,8 +607,8 @@ async function doSwap(di,mi,name){
 }
 
 function toggleEaten(di,mi){
-  const cur=eaten[di][mi];
-  eaten[di][mi]=cur===true?false:cur===false?null:true;
+  const cur=getEaten()[di][mi];
+  getEaten()[di][mi]=cur===true?false:cur===false?null:true;
   save(); render();
   if(curTab==='analyze') renderAnalyze();
 }
@@ -602,11 +617,11 @@ function toggleEaten(di,mi){
 function getActualTotals(di){
   let cal=0,pro=0,carb=0,fat=0;
   DAYS[di].meals.forEach((_,mi)=>{
-    if(eaten[di][mi]===true){const r=M[swaps[di][mi]];if(r){cal+=r.cal;pro+=r.pro;carb+=r.carb;fat+=r.fat;}}
+    if(getEaten()[di][mi]===true){const r=M[swaps[di][mi]];if(r){cal+=r.cal;pro+=r.pro;carb+=r.carb;fat+=r.fat;}}
   });
-  (foodLog[di]||[]).forEach(f=>{cal+=f.cal;pro+=f.pro;carb+=f.carb;fat+=f.fat;});
+  (getFoodLog()[di]||[]).forEach(f=>{cal+=f.cal;pro+=f.pro;carb+=f.carb;fat+=f.fat;});
   // Alcohol: ~130 cal per drink, negligible protein/carbs/fat
-  cal+=(alcLog[dateKey(di)]||0)*130;
+  cal+=(getAlcLog()[dateKey(di)]||0)*130;
   return{cal,pro,carb,fat};
 }
 
@@ -638,7 +653,7 @@ async function logFood(){
   const budget=getRemainingBudget(curDay);
   const plannedMeals=DAYS[curDay].meals.map((m,mi)=>{
     const r=M[swaps[curDay][mi]];
-    const st=eaten[curDay][mi]===true?'eaten':eaten[curDay][mi]===false?'skipped':'not yet eaten';
+    const st=getEaten()[curDay][mi]===true?'eaten':getEaten()[curDay][mi]===false?'skipped':'not yet eaten';
     return `${m.slot}: ${swaps[curDay][mi]} (${r?.cal||0} cal, ${r?.pro||0}g protein) — ${st}`;
   }).join('\n');
   const prompt=
@@ -658,8 +673,8 @@ async function logFood(){
     if(!rawText) throw new Error('Empty response from API');
     const parsed=JSON.parse(rawText.replace(/```json|```/g,'').trim());
     if(!parsed.name||!parsed.cal) throw new Error('API response missing required fields. Raw: '+rawText.slice(0,200));
-    if(!foodLog[curDay]) foodLog[curDay]=[];
-    foodLog[curDay].push({name:parsed.name,cal:parsed.cal,pro:parsed.pro||0,carb:parsed.carb||0,fat:parsed.fat||0,input:val,time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
+    const fl2=getFoodLog();if(!fl2[curDay]) fl2[curDay]=[];
+    fl2[curDay].push({name:parsed.name,cal:parsed.cal,pro:parsed.pro||0,carb:parsed.carb||0,fat:parsed.fat||0,input:val,time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
     save();
     const recs=parsed.recommendations||[];
     let h=`<div class="ai-result-name">✓ Logged: ${parsed.name}</div>
@@ -676,7 +691,7 @@ async function logFood(){
   btn.disabled=false; thinking.classList.remove('show');
 }
 
-function deleteLogItem(di,idx){if(foodLog[di]) foodLog[di].splice(idx,1);save();renderLog();render();}
+function deleteLogItem(di,idx){const fl=getFoodLog();if(fl[di]) fl[di].splice(idx,1);save();renderLog();render();}
 
 // ─── AI WORKOUT LOG ───────────────────────────────────────────────────────────
 async function logWorkout(){
@@ -689,7 +704,7 @@ async function logWorkout(){
   const workoutType=getDayWorkoutType(curDay);
   const planned=workoutType?WORKOUTS[workoutType]:null;
   const planDesc=planned?planned.exercises.map(e=>`• ${e.name}: ${e.sets} sets × ${e.repsTarget} (${e.equipment})`).join('\n'):'No specific workout planned for this day';
-  const existing=(workoutLog[curDay]||[]).map(e=>`• ${e.summary} (${e.time})`).join('\n')||'Nothing logged yet';
+  const existing=(getWorkoutLog()[curDay]||[]).map(e=>`• ${e.summary} (${e.time})`).join('\n')||'Nothing logged yet';
   const prompt='You are a fitness coach helping someone track their gym workouts.\n'+
     'Today is '+DAYS[curDay].name+' — '+(planned?planned.name+' day':'rest/active recovery day')+'.\n'+
     'Planned workout:\n'+planDesc+'\n'+
@@ -707,8 +722,8 @@ async function logWorkout(){
     const parsed=JSON.parse(rawText.replace(/```json|```/g,'').trim());
     if(!parsed.summary) throw new Error('API response missing summary field. Raw: '+rawText.slice(0,200));
     const logEntry={summary:parsed.summary,completed:parsed.completed||[],skipped:parsed.skipped||[],modifications:parsed.modifications||[],notes:parsed.notes||'',input:val,time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})};
-    if(!workoutLog[curDay]) workoutLog[curDay]=[];
-    workoutLog[curDay].push(logEntry);
+    const wl2=getWorkoutLog();if(!wl2[curDay]) wl2[curDay]=[];
+    wl2[curDay].push(logEntry);
     save();
     let h=`<div class="ai-result-name">✓ ${parsed.summary}</div>`;
     if(parsed.completed?.length) h+=`<div class="ai-section-label" style="color:var(--green)">Completed</div>${parsed.completed.map(e=>`<div style="font-size:13px;color:var(--text2);padding:3px 0">✓ ${e}</div>`).join('')}`;
@@ -726,7 +741,45 @@ async function logWorkout(){
   btn.disabled=false; thinking.classList.remove('show');
 }
 
-function deleteWorkoutItem(di,idx){if(workoutLog[di]) workoutLog[di].splice(idx,1);save();renderWorkout();}
+function deleteWorkoutItem(di,idx){const wl=getWorkoutLog();if(wl[di]) wl[di].splice(idx,1);save();renderWorkout();}
+
+function toggleExerciseDone(di, exIdx){
+  const wl=getWorkoutLog();
+  if(!wl[di]) wl[di]=[];
+  // Use a special "quick-log" entry at index -1 per exercise
+  if(!wl[di]._done) wl[di]._done={};
+  wl[di]._done[exIdx]=!wl[di]._done[exIdx];
+  save();
+  renderWorkout();
+}
+
+function getExerciseDone(di){
+  const wl=getWorkoutLog();
+  return (wl[di]&&wl[di]._done)||{};
+}
+
+function quickLogWorkout(di){
+  // Auto-generate a log entry from the checkmarks
+  const wl=getWorkoutLog();
+  const done=getExerciseDone(di);
+  const workoutType=getDayWorkoutType(di);
+  const planned=workoutType?WORKOUTS[workoutType]:null;
+  if(!planned) return;
+  const completed=[], skipped=[];
+  planned.exercises.forEach((e,i)=>{
+    if(done[i]) completed.push(e.name+' — '+e.sets+' sets × '+e.repsTarget);
+    else skipped.push(e.name);
+  });
+  if(!completed.length) return;
+  const summary=completed.length+'/'+planned.exercises.length+' exercises completed';
+  if(!wl[di]) wl[di]=[];
+  wl[di].push({summary,completed,skipped,modifications:[],notes:'Logged via checkmarks.',input:'quick log',time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
+  // Clear checkmarks
+  if(wl[di]._done) wl[di]._done={};
+  save();
+  renderWorkout();
+  showToast('Workout logged ✓','ok');
+}
 
 function workoutNavDay(delta){
   let newDay=curDay+delta;
@@ -765,7 +818,7 @@ function render(){
   const d=DAYS[curDay];
   const planned=getPlannedTotals(curDay);
   const actual=getActualTotals(curDay);
-  const hasActivity=eaten[curDay].some(e=>e!==null)||(foodLog[curDay]||[]).length>0||(alcLog[dateKey(curDay)]||0)>0;
+  const hasActivity=getEaten()[curDay].some(e=>e!==null)||(getFoodLog()[curDay]||[]).length>0||(getAlcLog()[dateKey(curDay)]||0)>0;
   let h='';
   h+=`<div class="workout">${d.workout}</div>`;
   if(planned){
@@ -784,13 +837,13 @@ function render(){
   d.meals.forEach((m,mi)=>{
     const sel=swaps[curDay][mi];const r=M[sel]||{};
     const isSwapped=sel!==m.def;const isOpen=ropen[curDay][mi];
-    const hasR=r.steps?.length>0;const ateState=eaten[curDay][mi];
+    const hasR=r.steps?.length>0;const ateState=getEaten()[curDay][mi];
     h+=`<div class="mcard${isOpen?' open':''}"><div class="mhead"><div class="mslot">${m.slot}</div><div class="mtoprow"><div style="flex:1"><div class="mname">${sel}${isSwapped?'<span class="swapped-dot"></span>':''}${ateState===true?'<span class="ate-dot"></span>':ateState===false?'<span class="skip-dot"></span>':''}</div>${r.why?`<div class="mwhy">${r.why}</div>`:''}${r.cal?`<div class="mmacros"><span class="mtag cal">${r.cal} cal</span><span class="mtag pro">${r.pro}g</span><span class="mtag carb">${r.carb}g</span><span class="mtag fat">${r.fat}g</span></div>`:''}</div><div class="mbtns"><button class="xbtn ${ateState===true?'ate':ateState===false?'ate-no':''}" onclick="toggleEaten(${curDay},${mi})">${ateState===true?'✓':ateState===false?'✗':'○'}</button>${hasR?`<button class="xbtn${isOpen?' open':''}" onclick="toggleRecipe(${curDay},${mi})">${isOpen?'▲':'▼'}</button>`:''}</div></div></div>`;
     if(hasR&&isOpen){h+=`<div class="rpanel open"><div class="rpin"><div class="rlabel">Ingredients</div><ul class="ilist">`;r.ing.forEach(([n,d2])=>{h+=`<li><span class="in">${n}</span><span style="font-size:12px;color:var(--text3)">${d2}</span></li>`;});h+=`</ul><div class="rlabel">Method</div><ol class="slist">`;r.steps.forEach(s=>{h+=`<li>${s}</li>`;});h+=`</ol>${r.tip?`<div class="tip">💡 ${r.tip}</div>`:''}</div></div>`;}
     if(m.alts?.length){h+=`<div class="swapsec"><div class="swaplbl">Swap for</div><div class="swappills">`;[m.def,...m.alts].forEach(a=>{const ar=M[a];const safe=a.replace(/'/g,"\\'");h+=`<button class="spill${sel===a?' active':''}" onclick="doSwap(${curDay},${mi},'${safe}')">${a}${ar?` <span style="font-size:10px;opacity:.55;font-family:DM Mono,monospace">${ar.cal}</span>`:''}</button>`;});h+=`</div></div>`;}
     h+=`</div>`;
   });
-  const logged=foodLog[curDay]||[];
+  const logged=getFoodLog()[curDay]||[];
   if(logged.length){
     h+=`<div class="mcard"><div class="mhead"><div class="mslot" style="margin-bottom:8px">Custom logged food</div>`;
     logged.forEach((f,idx)=>{h+=`<div class="log-item"><div><div style="font-size:14px;font-weight:500">${f.name}</div><div style="font-size:11px;color:var(--text3);font-family:DM Mono,monospace">${f.time} · ${f.cal} cal · ${f.pro}g protein</div></div><button class="log-del" onclick="deleteLogItem(${curDay},${idx})">✕</button></div>`;});
@@ -806,18 +859,18 @@ function getWeekScore(){
 
   DAYS.forEach((d,di)=>{
     const actual=getActualTotals(di);
-    const hasAnyData=eaten[di].some(e=>e!==null)||(foodLog[di]||[]).length>0;
+    const hasAnyData=getEaten()[di].some(e=>e!==null)||(getFoodLog()[di]||[]).length>0;
     if(hasAnyData){
       daysLogged++;
       const deficit=settings.targetCal-actual.cal;
       totalDeficit+=deficit; // positive = under calories (good), negative = over
     }
-    totalAlc+=(alcLog[dateKey(di)]||0);
+    totalAlc+=(getAlcLog()[dateKey(di)]||0);
 
     // Count workouts
-    if(d.type==='gym'){ workoutsPlanned++; if((workoutLog[di]||[]).length>0) workoutsCompleted++; }
+    if(d.type==='gym'){ workoutsPlanned++; if((getWorkoutLog()[di]||[]).length>0) workoutsCompleted++; }
     // Two-a-days: any workout on a rest/golf day
-    if(d.type!=='gym'&&(workoutLog[di]||[]).length>0) twoADays++;
+    if(d.type!=='gym'&&(getWorkoutLog()[di]||[]).length>0) twoADays++;
   });
 
   const avgDeficit=daysLogged>0?Math.round(totalDeficit/daysLogged):0;
@@ -844,10 +897,10 @@ async function analyzeWeek(){
   // Build week summary for AI
   const daysSummary=DAYS.map((d,di)=>{
     const actual=getActualTotals(di);
-    const wl=workoutLog[di]||[];
-    const fl=foodLog[di]||[];
-    const alc=alcLog[dateKey(di)]||0;
-    const ate=eaten[di].filter(e=>e===true).length;
+    const wl=getWorkoutLog()[di]||[];
+    const fl=getFoodLog()[di]||[];
+    const alc=getAlcLog()[dateKey(di)]||0;
+    const ate=getEaten()[di].filter(e=>e===true).length;
     return `${d.name}: ${actual.cal} cal eaten (target ${settings.targetCal}), ${actual.pro}g protein, ${ate}/${d.meals.length} planned meals, ${wl.length>0?'worked out':'no workout'}, ${alc} drinks${fl.length?`, also logged: ${fl.map(f=>f.name).join(', ')}`:''}, ${d.type==='gym'?d.sub:d.type}`;
   }).join('\n');
 
@@ -992,15 +1045,15 @@ async function generateRecoveryPlan(di){
   if(btn){btn.disabled=true;btn.textContent='Analyzing…';}
 
   // Build picture of what happened today
-  const logged=foodLog[di]||[];
-  const workedOut=!!(workoutLog[di]||[]).length;
+  const logged=getFoodLog()[di]||[];
+  const workedOut=!!(getWorkoutLog()[di]||[]).length;
   const plannedMeals=DAYS[di].meals.map((m,mi)=>{
     const r=M[swaps[di][mi]];
-    const st=eaten[di][mi]===true?'ate':eaten[di][mi]===false?'skipped':'unknown';
+    const st=getEaten()[di][mi]===true?'ate':getEaten()[di][mi]===false?'skipped':'unknown';
     return `${m.slot}: ${swaps[di][mi]} (${r?.cal||0} cal, ${r?.pro||0}g pro) — ${st}`;
   }).join('\n');
   const loggedFood=logged.map(f=>`${f.name}: ${f.cal} cal, ${f.pro}g protein`).join('\n')||'None';
-  const alcCount=alcLog[dateKey(di)]||0;
+  const alcCount=getAlcLog()[dateKey(di)]||0;
   const actual=getActualTotals(di);
 
   // Build next 2 days info
@@ -1133,9 +1186,9 @@ function renderRecoveryBanner(di){
   // Show recovery banner if there's significant overage today
   const actual=getActualTotals(di);
   const surplus=actual.cal-settings.targetCal;
-  const loggedCount=(foodLog[di]||[]).length;
-  const alcCount=alcLog[dateKey(di)]||0;
-  const workedOut=!!(workoutLog[di]||[]).length;
+  const loggedCount=(getFoodLog()[di]||[]).length;
+  const alcCount=getAlcLog()[dateKey(di)]||0;
+  const workedOut=!!(getWorkoutLog()[di]||[]).length;
   const noGym=DAYS[di].type==='gym'&&!workedOut;
 
   if(surplus<300&&alcCount<5&&!noGym&&loggedCount===0) return ''; // nothing to recover from
@@ -1181,7 +1234,7 @@ function renderRecoveryPlan(){
 // ─── RENDER FOOD LOG TAB ──────────────────────────────────────────────────────
 function renderLog(){
   const budget=getRemainingBudget(curDay);
-  const logged=foodLog[curDay]||[];
+  const logged=getFoodLog()[curDay]||[];
   let h=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:DM Mono,monospace;margin-bottom:12px">${DAYS[curDay].name} — budget remaining</div>`;
   h+=`<div class="totals" style="margin-bottom:16px">`;
   [['Calories',budget.calR,'cal','cal'],['Protein',budget.proR,'g','pro'],['Carbs',budget.carbR,'g','carb'],['Fat',budget.fatR,'g','fat']].forEach(([l,v,u,cls])=>{
@@ -1192,7 +1245,7 @@ function renderLog(){
   // Alcohol tracker
   const dayNames2=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   let weekTotal2=0;
-  DAYS.forEach((_,i)=>{weekTotal2+=(alcLog[dateKey(i)]||0);});
+  DAYS.forEach((_,i)=>{weekTotal2+=(getAlcLog()[dateKey(i)]||0);});
   const weekAvg2=weekTotal2>0?(weekTotal2/7).toFixed(1):'0';
   const calFromAlc2=weekTotal2*130;
   const avgNum2=parseFloat(weekAvg2);
@@ -1205,7 +1258,7 @@ function renderLog(){
     <div class="alc-title">🍺 Alcohol — this week</div>
     <div class="alc-week">`;
   DAYS.forEach((_,i)=>{
-    const count=alcLog[dateKey(i)]||0;
+    const count=getAlcLog()[dateKey(i)]||0;
     const cls=count>=10?'high':count>=5?'med':count>0?'low':'';
     h+=`<div class="alc-day"><div class="alc-day-label">${dayNames2[i]}</div><div class="alc-count ${cls}">${count}</div><div class="alc-btns"><button class="alc-btn" onclick="alcChange(${i},-1)">−</button><button class="alc-btn" onclick="alcChange(${i},1)">+</button></div></div>`;
   });
@@ -1238,12 +1291,29 @@ function renderLog(){
 function renderWorkout(){
   const workoutType=getDayWorkoutType(curDay);
   const planned=workoutType?WORKOUTS[workoutType]:null;
-  const logged=workoutLog[curDay]||[];
+  const logged=getWorkoutLog()[curDay]||[];
   let h='';
   if(planned){
     h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:DM Mono,monospace;margin-bottom:12px">${DAYS[curDay].name} — ${planned.name}</div>`;
     h+=`<div class="settings-section" style="margin-bottom:16px"><div class="settings-title">Today's exercises</div>`;
-    planned.exercises.forEach(e=>{h+=`<div class="setting-row"><div><div class="setting-label">${e.name}</div><div class="setting-sub">${e.sets} sets × ${e.repsTarget}${e.equipment?' · '+e.equipment:''}</div></div></div>`;});
+    const done=getExerciseDone(curDay);
+    planned.exercises.forEach((e,i)=>{
+      const isDone=!!done[i];
+      h+=`<div class="setting-row" style="cursor:pointer" onclick="toggleExerciseDone(${curDay},${i})">
+        <div><div class="setting-label" style="${isDone?'text-decoration:line-through;color:var(--text3)':''}">${e.name}</div>
+        <div class="setting-sub">${e.sets} sets × ${e.repsTarget}${e.equipment?' · '+e.equipment:''}</div></div>
+        <div style="width:28px;height:28px;border-radius:50%;border:1px solid ${isDone?'var(--green)':'var(--border2)'};background:${isDone?'var(--green-dim)':'var(--surface2)'};color:${isDone?'var(--green)':'var(--text3)'};display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">
+          ${isDone?'✓':'○'}
+        </div>
+      </div>`;
+    });
+    const doneCount=Object.values(done).filter(Boolean).length;
+    if(doneCount>0){
+      h+=`<div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace">${doneCount}/${planned.exercises.length} checked off</div>
+        <button style="padding:6px 14px;background:var(--green-dim);border:1px solid var(--green);color:var(--green);border-radius:var(--radius-sm);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace" onclick="quickLogWorkout(${curDay})">Save as workout log</button>
+      </div>`;
+    }
     h+=`</div>`;
   } else {
     h+=`<div class="workout" style="margin-bottom:16px">${DAYS[curDay].name} is a ${DAYS[curDay].type==='rest'?'rest / active recovery day':'golf day'}. No lifting planned — but log anything you did.</div>`;
@@ -1281,17 +1351,17 @@ async function analyzeFullPlan(){
   const weekSummary=DAYS.map((d,di)=>{
     const actual=getActualTotals(di);
     const planned=getPlannedTotals(di);
-    const wl=workoutLog[di]||[];
-    const fl=foodLog[di]||[];
-    const alc=alcLog[dateKey(di)]||0;
-    const ateCount=eaten[di].filter(e=>e===true).length;
-    const skippedCount=eaten[di].filter(e=>e===false).length;
+    const wl=getWorkoutLog()[di]||[];
+    const fl=getFoodLog()[di]||[];
+    const alc=getAlcLog()[dateKey(di)]||0;
+    const ateCount=getEaten()[di].filter(e=>e===true).length;
+    const skippedCount=getEaten()[di].filter(e=>e===false).length;
     return d.name+': planned '+(planned?planned.cal+' cal':'-')+', actual '+actual.cal+' cal, '+actual.pro+'g protein, ate '+ateCount+'/'+d.meals.length+' meals'+(skippedCount?' ('+skippedCount+' skipped)':'')+(wl.length?' | workout: '+wl[0].summary:' | no workout')+(fl.length?' | extra: '+fl.map(f=>f.name).join(', '):'')+(alc?' | '+alc+' drinks':'');
   }).join('\n');
 
   const ws=getWeekScore();
   const workoutDetail=DAYS.map((d,di)=>{
-    const wl=workoutLog[di]||[];
+    const wl=getWorkoutLog()[di]||[];
     if(!wl.length&&d.type==='gym') return d.name+': MISSED';
     if(!wl.length) return d.name+': '+d.type;
     return d.name+': '+wl.map(w=>{
@@ -1405,7 +1475,7 @@ function renderAnalyze(){
   h+=`<div class="settings-section" style="margin-bottom:12px">`;
   DAYS.forEach((d,di)=>{
     if(d.type==='rest') return;
-    const wl=workoutLog[di]||[];
+    const wl=getWorkoutLog()[di]||[];
     const done=wl.length>0;
     const status=done?'✓ '+wl[0].summary:'—';
     const statusColor=done?'var(--green)':'var(--text3)';
@@ -1441,8 +1511,8 @@ function renderAnalyze(){
   DAYS.forEach((d,di)=>{
     const actual=getActualTotals(di);
     const surplus=actual.cal-settings.targetCal;
-    const alc=alcLog[dateKey(di)]||0;
-    const noGym=d.type==='gym'&&!(workoutLog[di]||[]).length;
+    const alc=getAlcLog()[dateKey(di)]||0;
+    const noGym=d.type==='gym'&&!(getWorkoutLog()[di]||[]).length;
     const hasIssue=surplus>300||alc>=5||noGym;
     h+=`<button style="padding:6px 12px;border-radius:20px;border:1px solid ${hasIssue?'var(--red)':'var(--border2)'};background:${hasIssue?'var(--red-dim)':'var(--surface2)'};color:${hasIssue?'var(--red)':'var(--text2)'};font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s" onclick="triggerRecovery(${di})">${d.short}${hasIssue?' ⚡':''}</button>`;
   });
@@ -1479,7 +1549,7 @@ function renderAnalyze(){
   h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:10px">📋 History</div>`;
   let hasAnyHist=false;
   DAYS.forEach((d,di)=>{
-    const hasData=eaten[di].some(e=>e!==null)||(foodLog[di]||[]).length>0||(workoutLog[di]||[]).length>0;
+    const hasData=getEaten()[di].some(e=>e!==null)||(getFoodLog()[di]||[]).length>0||(getWorkoutLog()[di]||[]).length>0;
     if(!hasData) return;
     hasAnyHist=true;
     const dt=new Date(getWeekStart());dt.setDate(dt.getDate()+di);
@@ -1487,18 +1557,18 @@ function renderAnalyze(){
     h+=`<div class="hist-day"><div class="hist-day-head"><span class="hist-day-name">${d.name}</span><span class="hist-day-date">${dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></div>`;
     h+=`<div class="hist-day-totals"><span class="hist-macro" style="background:var(--surface2);color:var(--text2)">${actual.cal} cal</span><span class="hist-macro" style="background:var(--blue-dim);color:var(--blue)">${actual.pro}g pro</span><span class="hist-macro" style="background:var(--amber-dim);color:var(--amber)">${actual.carb}g carbs</span><span class="hist-macro" style="background:var(--green-dim);color:var(--green)">${actual.fat}g fat</span></div>`;
     d.meals.forEach((m,mi)=>{
-      const ateState=eaten[di][mi];if(ateState===null) return;
+      const ateState=getEaten()[di][mi];if(ateState===null) return;
       const sel=swaps[di][mi];const r=M[sel];
       h+=`<div class="hist-meal"><div><div class="hist-meal-name">${sel}</div><div class="hist-meal-slot">${m.slot}${r?' · '+r.cal+' cal · '+r.pro+'g pro':''}</div></div><span class="hist-ate ${ateState?'yes':'no'}">${ateState?'ate':'skipped'}</span></div>`;
     });
-    if((foodLog[di]||[]).length){
+    if((getFoodLog()[di]||[]).length){
       h+=`<div class="hist-logged">`;
-      (foodLog[di]||[]).forEach(f=>{h+=`<div class="hist-logged-item"><span style="color:var(--purple)">📝 ${f.name}</span><span style="font-family:'DM Mono',monospace">${f.cal} cal · ${f.pro}g pro</span></div>`;});
+      (getFoodLog()[di]||[]).forEach(f=>{h+=`<div class="hist-logged-item"><span style="color:var(--purple)">📝 ${f.name}</span><span style="font-family:'DM Mono',monospace">${f.cal} cal · ${f.pro}g pro</span></div>`;});
       h+=`</div>`;
     }
-    if((workoutLog[di]||[]).length){
+    if((getWorkoutLog()[di]||[]).length){
       h+=`<div class="hist-logged">`;
-      (workoutLog[di]||[]).forEach(w=>{h+=`<div class="hist-logged-item"><span style="color:var(--blue)">🏋️ ${w.summary}</span><span style="font-family:'DM Mono',monospace;font-size:11px">${w.time}</span></div>`;});
+      (getWorkoutLog()[di]||[]).forEach(w=>{h+=`<div class="hist-logged-item"><span style="color:var(--blue)">🏋️ ${w.summary}</span><span style="font-family:'DM Mono',monospace;font-size:11px">${w.time}</span></div>`;});
       h+=`</div>`;
     }
     h+=`</div>`;
@@ -1654,16 +1724,16 @@ function renderGrocery(){
 function renderHistory(){
   let hasAny=false,h='';
   DAYS.forEach((d,di)=>{
-    const hasData=eaten[di].some(e=>e!==null)||(foodLog[di]||[]).length>0||(workoutLog[di]||[]).length>0;
+    const hasData=getEaten()[di].some(e=>e!==null)||(getFoodLog()[di]||[]).length>0||(getWorkoutLog()[di]||[]).length>0;
     if(!hasData) return;
     hasAny=true;
     const dt=new Date(WEEK_START);dt.setDate(dt.getDate()+di);
     const actual=getActualTotals(di);
     h+=`<div class="hist-day"><div class="hist-day-head"><span class="hist-day-name">${d.name}</span><span class="hist-day-date">${dt.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></div>`;
     h+=`<div class="hist-day-totals"><span class="hist-macro" style="background:var(--surface2);color:var(--text2)">${actual.cal} cal</span><span class="hist-macro" style="background:var(--blue-dim);color:var(--blue)">${actual.pro}g pro</span><span class="hist-macro" style="background:var(--amber-dim);color:var(--amber)">${actual.carb}g carbs</span><span class="hist-macro" style="background:var(--green-dim);color:var(--green)">${actual.fat}g fat</span></div>`;
-    d.meals.forEach((m,mi)=>{const ateState=eaten[di][mi];if(ateState===null) return;const sel=swaps[di][mi];const r=M[sel];h+=`<div class="hist-meal"><div><div class="hist-meal-name">${sel}</div><div class="hist-meal-slot">${m.slot}${r?` · ${r.cal} cal · ${r.pro}g pro`:''}</div></div><span class="hist-ate ${ateState?'yes':'no'}">${ateState?'ate':'skipped'}</span></div>`;});
-    if((foodLog[di]||[]).length){h+=`<div class="hist-logged">`;(foodLog[di]||[]).forEach(f=>{h+=`<div class="hist-logged-item"><span style="color:var(--purple)">📝 ${f.name}</span><span style="font-family:DM Mono,monospace">${f.cal} cal · ${f.pro}g pro</span></div>`;});h+=`</div>`;}
-    if((workoutLog[di]||[]).length){h+=`<div class="hist-logged">`;(workoutLog[di]||[]).forEach(w=>{h+=`<div class="hist-logged-item"><span style="color:var(--blue)">🏋️ ${w.summary}</span><span style="font-family:DM Mono,monospace;font-size:11px">${w.time}</span></div>`;});h+=`</div>`;}
+    d.meals.forEach((m,mi)=>{const ateState=getEaten()[di][mi];if(ateState===null) return;const sel=swaps[di][mi];const r=M[sel];h+=`<div class="hist-meal"><div><div class="hist-meal-name">${sel}</div><div class="hist-meal-slot">${m.slot}${r?` · ${r.cal} cal · ${r.pro}g pro`:''}</div></div><span class="hist-ate ${ateState?'yes':'no'}">${ateState?'ate':'skipped'}</span></div>`;});
+    if((getFoodLog()[di]||[]).length){h+=`<div class="hist-logged">`;(getFoodLog()[di]||[]).forEach(f=>{h+=`<div class="hist-logged-item"><span style="color:var(--purple)">📝 ${f.name}</span><span style="font-family:DM Mono,monospace">${f.cal} cal · ${f.pro}g pro</span></div>`;});h+=`</div>`;}
+    if((getWorkoutLog()[di]||[]).length){h+=`<div class="hist-logged">`;(getWorkoutLog()[di]||[]).forEach(w=>{h+=`<div class="hist-logged-item"><span style="color:var(--blue)">🏋️ ${w.summary}</span><span style="font-family:DM Mono,monospace;font-size:11px">${w.time}</span></div>`;});h+=`</div>`;}
     h+=`</div>`;
   });
   if(!hasAny) h=`<div class="empty-state">No history yet.<br>Tap ○ on any meal to mark eaten or skipped.<br>Use Food and Workout tabs to log what you actually did.</div>`;
@@ -1672,7 +1742,7 @@ function renderHistory(){
 
 // ─── RENDER SETTINGS ──────────────────────────────────────────────────────────
 function dateKey(offset){const d=getWeekStart();d.setDate(d.getDate()+offset);return d.toISOString().split('T')[0];}
-function alcChange(dayOffset,delta){const k=dateKey(dayOffset);alcLog[k]=Math.max(0,(alcLog[k]||0)+delta);save();renderSettings();}
+function alcChange(dayOffset,delta){const k=dateKey(dayOffset);const al=getAlcLog();al[k]=Math.max(0,(al[k]||0)+delta);save();if(curTab==='log') renderLog(); else renderSettings();}
 function renderSettings(){
   let h='';
   // Alcohol tracker moved to Food tab
@@ -1855,8 +1925,8 @@ function renderMonthView(){
       if(d.type==='gym') dots+=`<div class="md-dot gym"></div>`;
       else if(d.type==='golf') dots+=`<div class="md-dot golf"></div>`;
       else dots+=`<div class="md-dot rest"></div>`;
-      if((workoutLog[dow]||[]).length) dots+=`<div class="md-dot workout"></div>`;
-      if((foodLog[dow]||[]).length) dots+=`<div class="md-dot cheat"></div>`;
+      if((getWorkoutLog()[dow]||[]).length) dots+=`<div class="md-dot workout"></div>`;
+      if((getFoodLog()[dow]||[]).length) dots+=`<div class="md-dot cheat"></div>`;
       miniLabel=d.meals[0]?swaps[dow][0].split(' ')[0]:'';
     }
     // Check if any meals eaten or logged for past days
