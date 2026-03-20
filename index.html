@@ -117,6 +117,91 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .ai-rec strong{color:var(--text);display:block;margin-bottom:2px}
 .ai-section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin:8px 0 4px}
 
+/* Recovery Plan */
+.recovery-banner{background:var(--red-dim);border:1px solid var(--red);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.recovery-banner-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--red);font-family:'DM Mono',monospace;margin-bottom:6px}
+.recovery-banner-msg{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.recovery-btn{background:var(--red-dim);border:1px solid var(--red);color:var(--red);padding:10px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;transition:all .2s;width:100%}
+.recovery-btn:hover{background:var(--red);color:var(--bg)}
+.recovery-btn:disabled{opacity:.4;pointer-events:none}
+.recovery-plan-card{background:var(--surface);border:1px solid var(--amber);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.rpc-head{background:var(--amber-dim);padding:10px 14px}
+.rpc-day{font-size:12px;font-weight:600;color:var(--amber);font-family:'DM Mono',monospace}
+.rpc-title{font-size:15px;font-weight:600;color:var(--text);margin-top:2px}
+.rpc-body{padding:12px 14px}
+.rpc-section{margin-bottom:10px}
+.rpc-section:last-child{margin-bottom:0}
+.rpc-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px}
+.rpc-item{font-size:13px;color:var(--text2);padding:4px 0;line-height:1.4}
+.rpc-apply-btn{width:100%;padding:10px;background:var(--amber-dim);border:1px solid var(--amber);color:var(--amber);border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;margin-top:10px;transition:all .2s}
+.rpc-apply-btn:hover{background:var(--amber);color:var(--bg)}
+.rpc-apply-btn:disabled{opacity:.4;pointer-events:none}
+
+/* Earned Cheat Day */
+.earned-banner{background:var(--green-dim);border:1px solid var(--green);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.earned-banner-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green);font-family:'DM Mono',monospace;margin-bottom:6px}
+.earned-banner-msg{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.earned-btn{background:var(--green-dim);border:1px solid var(--green);color:var(--green);padding:10px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;transition:all .2s;width:100%}
+.earned-btn:hover{background:var(--green);color:var(--bg)}
+.earned-btn:disabled{opacity:.4;pointer-events:none}
+.cheat-card{background:var(--surface);border:1px solid var(--green);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.cc-head{background:var(--green-dim);padding:12px 14px}
+.cc-emoji{font-size:24px;margin-bottom:4px}
+.cc-name{font-size:17px;font-weight:600;color:var(--text)}
+.cc-where{font-size:12px;color:var(--green);font-family:'DM Mono',monospace;margin-top:2px}
+.cc-body{padding:12px 14px}
+.cc-why{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.cc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.cc-stat{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 4px;text-align:center}
+.cc-stat .n{font-size:15px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text)}
+.cc-stat .l{font-size:10px;color:var(--text3);margin-top:1px;letter-spacing:.5px}
+.cc-rules{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px}
+.cc-rules-title{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px}
+.cc-rule{font-size:12px;color:var(--text2);padding:3px 0;line-height:1.4}
+.cc-apply-btn{width:100%;padding:10px;background:var(--green-dim);border:1px solid var(--green);color:var(--green);border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s}
+.cc-apply-btn:hover{background:var(--green);color:var(--bg)}
+.week-score-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.week-score-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:12px}
+.week-score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.ws-cell{text-align:center;padding:8px 4px}
+.ws-cell .n{font-size:18px;font-weight:600;font-family:'DM Mono',monospace}
+.ws-cell .l{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.5px}
+.ws-cell .n.good{color:var(--green)}.ws-cell .n.ok{color:var(--amber)}.ws-cell .n.bad{color:var(--red)}
+.week-check-btn{width:100%;padding:11px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;transition:all .2s}
+.week-check-btn:hover{border-color:var(--green);color:var(--green)}
+.week-check-btn:disabled{opacity:.4;pointer-events:none}
+
+/* Pantry */
+.pantry-section{margin-bottom:16px}
+.pantry-cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.pantry-cat-btn{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
+.pantry-cat-btn.active{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
+.pantry-input-row{display:flex;gap:8px;margin-bottom:12px}
+.pantry-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:9px 12px;font-family:'DM Sans',sans-serif;outline:none}
+.pantry-input:focus{border-color:var(--amber)}
+.pantry-input::placeholder{color:var(--text3)}
+.pantry-add-btn{background:var(--amber-dim);border:1px solid var(--amber);color:var(--amber);padding:9px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap}
+.pi{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.pi:last-child{border-bottom:none}
+.pi-name{flex:1;color:var(--text)}
+.pi-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 4px}
+.pi-del:hover{color:var(--red)}
+.suggest-btn{width:100%;padding:12px;background:var(--purple-dim);border:1px solid var(--purple);color:var(--purple);border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;margin-bottom:12px;transition:all .2s}
+.suggest-btn:disabled{opacity:.4;pointer-events:none}
+.suggestion-card{background:var(--surface);border:1px solid var(--purple);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.sc-head{padding:12px 14px}
+.sc-name{font-size:16px;font-weight:600;color:var(--text);margin-bottom:4px}
+.sc-slot{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px}
+.sc-why{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px}
+.sc-have{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}
+.sc-tag{font-size:11px;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace}
+.sc-tag.have{background:var(--green-dim);color:var(--green)}
+.sc-tag.need{background:var(--red-dim);color:var(--red)}
+.sc-tag.macro{background:var(--surface2);color:var(--text2)}
+.sc-actions{border-top:1px solid var(--border);padding:10px 14px}
+.sc-swap-btn{width:100%;padding:9px;background:var(--green-dim);border:1px solid var(--green);color:var(--green);border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s}
+.sc-swap-btn:hover{background:var(--green);color:var(--bg)}
+
 /* Grocery */
 .grocery-section{margin-bottom:16px}
 .gs-title{font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
@@ -131,6 +216,41 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .grocery-actions{display:flex;gap:8px;margin-bottom:16px}
 .gact-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;transition:all .15s}
 .gact-btn:hover{border-color:var(--text3);color:var(--text)}
+
+/* Pantry */
+.pantry-section{margin-bottom:16px}
+.pantry-cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.pantry-cat-btn{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
+.pantry-cat-btn.active{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
+.pantry-input-row{display:flex;gap:8px;margin-bottom:12px}
+.pantry-input{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:9px 12px;font-family:'DM Sans',sans-serif;outline:none}
+.pantry-input:focus{border-color:var(--amber)}
+.pantry-input::placeholder{color:var(--text3)}
+.pantry-add-btn{background:var(--amber-dim);border:1px solid var(--amber);color:var(--amber);padding:9px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap}
+.pi{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.pi:last-child{border-bottom:none}
+.pi-name{flex:1;color:var(--text)}
+.pi-cat{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);padding:1px 6px;border-radius:10px;border:1px solid var(--border2)}
+.pi-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 4px}
+.pi-del:hover{color:var(--red)}
+
+/* Meal suggestions */
+.suggest-btn{width:100%;padding:12px;background:var(--purple-dim);border:1px solid var(--purple);color:var(--purple);border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;margin-bottom:12px;transition:all .2s}
+.suggest-btn:hover{background:var(--purple);color:var(--bg)}
+.suggest-btn:disabled{opacity:.4;pointer-events:none}
+.suggestion-card{background:var(--surface);border:1px solid var(--purple);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.sc-head{padding:12px 14px}
+.sc-name{font-size:16px;font-weight:600;color:var(--text);margin-bottom:4px}
+.sc-slot{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px}
+.sc-why{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px}
+.sc-have{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}
+.sc-tag{font-size:11px;padding:2px 8px;border-radius:20px;font-family:'DM Mono',monospace}
+.sc-tag.have{background:var(--green-dim);color:var(--green)}
+.sc-tag.need{background:var(--red-dim);color:var(--red)}
+.sc-tag.macro{background:var(--surface2);color:var(--text2)}
+.sc-actions{border-top:1px solid var(--border);padding:10px 14px;display:flex;gap:8px}
+.sc-swap-btn{flex:1;padding:8px;background:var(--green-dim);border:1px solid var(--green);color:var(--green);border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;transition:all .2s}
+.sc-swap-btn:hover{background:var(--green);color:var(--bg)}
 
 /* History */
 .hist-day{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
@@ -345,13 +465,17 @@ let ropen=DAYS.map(d=>d.meals.map(()=>false));
 let swaps=DAYS.map(d=>d.meals.map(m=>m.def));
 let eaten=DAYS.map(d=>d.meals.map(()=>null));
 let foodLog={};    // {dayIdx:[{name,cal,pro,carb,fat,input,time}]}
+let pantry={};     // {itemName: category} — what's already in the house
+let suggestions=[]; // current AI suggestions
+let recoveryPlan=null; // {dayIdx, totalExtraCal, totalExtraPro, days:[{dayIdx,name,meals:[],workout,calTarget,proTarget}]}
+let earnedReport=null; // weekly performance + cheat meal suggestions
 let workoutLog={}; // {dayIdx:[{summary,completed,skipped,modifications,notes,time}]}
 let alcLog={};
 let groceryChecked={};
 let settings={targetCal:2150,targetPro:170,targetCarb:185,targetFat:62};
 const SK='ms_v4';
 
-function save(){try{localStorage.setItem(SK,JSON.stringify({swaps,eaten,foodLog,workoutLog,alcLog,groceryChecked,settings}));}catch(e){}}
+function save(){try{localStorage.setItem(SK,JSON.stringify({swaps,eaten,foodLog,workoutLog,alcLog,groceryChecked,pantry,recoveryPlan,earnedReport,settings}));}catch(e){}}
 function load(){
   try{
     const d=JSON.parse(localStorage.getItem(SK));
@@ -362,6 +486,9 @@ function load(){
     if(d.workoutLog) workoutLog=d.workoutLog;
     if(d.alcLog) alcLog=d.alcLog;
     if(d.groceryChecked) groceryChecked=d.groceryChecked;
+    if(d.pantry) pantry=d.pantry;
+    if(d.recoveryPlan) recoveryPlan=d.recoveryPlan;
+    if(d.earnedReport) earnedReport=d.earnedReport;
     if(d.settings) settings={...settings,...d.settings};
   }catch(e){}
 }
@@ -499,14 +626,14 @@ async function logWorkout(){
   const planned=workoutType?WORKOUTS[workoutType]:null;
   const planDesc=planned?planned.exercises.map(e=>`• ${e.name}: ${e.sets} sets × ${e.repsTarget} (${e.equipment})`).join('\n'):'No specific workout planned for this day';
   const existing=(workoutLog[curDay]||[]).map(e=>`• ${e.summary} (${e.time})`).join('\n')||'Nothing logged yet';
-  const prompt=`You are a fitness coach helping someone track their gym workouts.
-Today is ${DAYS[curDay].name} — ${planned?planned.name+' day':'rest/active recovery day'}.
-Planned workout:\n${planDesc}
-Already logged today:\n${existing}
-The person says: "${val}"
-Respond ONLY with valid JSON (no markdown, no backticks):
-{"summary":"brief 1-line description","completed":["exercises completed"],"skipped":["exercises skipped"],"modifications":["any modifications — lighter weight, fewer sets, etc."],"notes":"1-2 sentences of honest coach feedback — acknowledge what they did, briefly note what was missed if anything, keep it encouraging but honest","recommendations":[{"title":"short title","detail":"specific recommendation for next session or rest of week"}]}
-Keep it practical and specific. If they crushed it, say so. If they skipped a lot, acknowledge it without being harsh. Recommendations should be actionable.`;
+  const prompt='You are a fitness coach helping someone track their gym workouts.\n'+
+    'Today is '+DAYS[curDay].name+' — '+(planned?planned.name+' day':'rest/active recovery day')+'.\n'+
+    'Planned workout:\n'+planDesc+'\n'+
+    'Already logged today:\n'+existing+'\n'+
+    'The person says: "'+val+'"\n'+
+    'Respond ONLY with valid JSON (no markdown, no backticks):\n'+
+    '{"summary":"brief 1-line description","completed":["exercises completed"],"skipped":["exercises skipped"],"modifications":["any modifications — lighter weight, fewer sets, etc."],"notes":"1-2 sentences of honest coach feedback — acknowledge what they did, briefly note what was missed if anything, keep it encouraging but honest","recommendations":[{"title":"short title","detail":"specific recommendation for next session or rest of week"}]}\n'+
+    'Keep it practical and specific. If they crushed it, say so. If they skipped a lot, acknowledge it without being harsh. Recommendations should be actionable.';
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})});
     const data=await resp.json();
@@ -582,6 +709,382 @@ function render(){
   document.getElementById('content').innerHTML=h;
 }
 
+// ─── EARNED CHEAT DAY ANALYSIS ───────────────────────────────────────────────
+function getWeekScore(){
+  // Analyze the full week's data
+  let daysLogged=0, totalDeficit=0, totalAlc=0, workoutsCompleted=0, workoutsPlanned=0, twoADays=0;
+
+  DAYS.forEach((d,di)=>{
+    const actual=getActualTotals(di);
+    const hasAnyData=eaten[di].some(e=>e!==null)||(foodLog[di]||[]).length>0;
+    if(hasAnyData){
+      daysLogged++;
+      const deficit=settings.targetCal-actual.cal;
+      totalDeficit+=deficit; // positive = under calories (good), negative = over
+    }
+    totalAlc+=(alcLog[dateKey(di)]||0);
+
+    // Count workouts
+    if(d.type==='gym'){ workoutsPlanned++; if((workoutLog[di]||[]).length>0) workoutsCompleted++; }
+    // Two-a-days: any workout on a rest/golf day
+    if(d.type!=='gym'&&(workoutLog[di]||[]).length>0) twoADays++;
+  });
+
+  const avgDeficit=daysLogged>0?Math.round(totalDeficit/daysLogged):0;
+  const alcPerNight=daysLogged>0?(totalAlc/7).toFixed(1):0;
+  const workoutRate=workoutsPlanned>0?Math.round(workoutsCompleted/workoutsPlanned*100):0;
+
+  // Score 0–100
+  let score=50; // baseline
+  if(avgDeficit>200) score+=20; else if(avgDeficit>0) score+=10; else if(avgDeficit<-500) score-=20; else if(avgDeficit<-200) score-=10;
+  if(workoutRate>=100) score+=20; else if(workoutRate>=75) score+=10; else if(workoutRate<50) score-=15;
+  if(twoADays>=2) score+=15; else if(twoADays===1) score+=8;
+  if(parseFloat(alcPerNight)<3) score+=10; else if(parseFloat(alcPerNight)>8) score-=15; else if(parseFloat(alcPerNight)>5) score-=8;
+  score=Math.max(0,Math.min(100,score));
+
+  return {score,avgDeficit,totalAlc,alcPerNight,workoutsCompleted,workoutsPlanned,workoutRate,twoADays,daysLogged};
+}
+
+async function analyzeWeek(){
+  const btn=document.getElementById('week-check-btn');
+  if(btn){btn.disabled=true;btn.textContent='Analyzing your week…';}
+
+  const ws=getWeekScore();
+
+  // Build week summary for AI
+  const daysSummary=DAYS.map((d,di)=>{
+    const actual=getActualTotals(di);
+    const wl=workoutLog[di]||[];
+    const fl=foodLog[di]||[];
+    const alc=alcLog[dateKey(di)]||0;
+    const ate=eaten[di].filter(e=>e===true).length;
+    return `${d.name}: ${actual.cal} cal eaten (target ${settings.targetCal}), ${actual.pro}g protein, ${ate}/${d.meals.length} planned meals, ${wl.length>0?'worked out':'no workout'}, ${alc} drinks${fl.length?`, also logged: ${fl.map(f=>f.name).join(', ')}`:''}, ${d.type==='gym'?d.sub:d.type}`;
+  }).join('\n');
+
+  const prompt='You are a fitness coach analyzing someone\'s week and deciding if they\'ve earned a reward.\n\n'+
+    'Their goals: 180 lbs / 15% body fat. 41-year-old golfer. Daily targets: '+settings.targetCal+' cal, '+settings.targetPro+'g protein.\n\n'+
+    'WEEK SUMMARY:\n'+daysSummary+'\n\n'+
+    'WEEK STATS:\n'+
+    '- Average daily calorie deficit vs target: '+(ws.avgDeficit>0?'+'+ws.avgDeficit:ws.avgDeficit)+' cal (positive = under target = good)\n'+
+    '- Workouts completed: '+ws.workoutsCompleted+'/'+ws.workoutsPlanned+' planned ('+ws.workoutRate+'%)\n'+
+    '- Extra workouts on rest days: '+ws.twoADays+'\n'+
+    '- Total alcohol this week: '+ws.totalAlc+' drinks (~'+ws.alcPerNight+' per night avg)\n'+
+    '- Week score: '+ws.score+'/100\n\n'+
+    'Based on this data, determine:\n'+
+    '1. Has this person genuinely earned a cheat meal / treat?\n'+
+    '2. If yes, what should they have and where? Be specific — name a real restaurant or dish (Buffalo Wild Wings, pizza night, BBQ, ice cream, burger, etc.)\n'+
+    '3. Give honest feedback about their week — what was strong, what needs work\n\n'+
+    'Criteria for earning a cheat meal:\n'+
+    '- Score >= 70: Clearly earned it — suggest something good\n'+
+    '- Score 55-69: Partially earned — suggest something moderate\n'+
+    '- Score < 55: Not yet earned — be honest but not harsh\n\n'+
+    'Respond ONLY with valid JSON (no markdown, no backticks):\n'+
+    '{\n'+
+    '  "earned": true or false,\n'+
+    '  "score": '+ws.score+',\n'+
+    '  "verdict": "1-2 sentence honest assessment of their week",\n'+
+    '  "strengths": ["what they did well"],\n'+
+    '  "improvements": ["what to work on next week"],\n'+
+    '  "cheatMeal": {\n'+
+    '    "name": "specific food/meal e.g. Buffalo Wild Wings, Domino pizza, Culver burger",\n'+
+    '    "where": "where to get it or how to make it",\n'+
+    '    "emoji": "relevant emoji",\n'+
+    '    "why": "why they earned THIS specific treat",\n'+
+    '    "cal": estimated_calories_as_number,\n'+
+    '    "pro": estimated_protein_grams_as_number,\n'+
+    '    "rules": ["1-2 guardrails to keep it from derailing the week"],\n'+
+    '    "when": "best day/time to have it this week"\n'+
+    '  }\n'+
+    '}\n'+
+    'If not earned (score < 55), still include cheatMeal but explain in why what they need to hit first.';
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
+    earnedReport={...parsed,weekScore:ws,generated:new Date().toISOString()};
+    save();
+    showToast(parsed.earned?'You earned it! 🎉':'Keep pushing 💪','ok');
+    renderLog();
+  }catch(e){
+    console.error(e);
+    showToast('Could not analyze week — try again','err');
+  }
+  if(btn){btn.disabled=false;btn.textContent='🏆 Check if I earned a cheat meal';}
+}
+
+function renderWeekScore(){
+  const ws=getWeekScore();
+  if(ws.daysLogged===0) return '';
+  const scoreColor=ws.score>=70?'good':ws.score>=55?'ok':'bad';
+  const workoutColor=ws.workoutRate>=100?'good':ws.workoutRate>=75?'ok':'bad';
+  const alcColor=parseFloat(ws.alcPerNight)<3?'good':parseFloat(ws.alcPerNight)<6?'ok':'bad';
+  const defColor=ws.avgDeficit>100?'good':ws.avgDeficit>0?'ok':'bad';
+
+  return `<div class="week-score-card">
+    <div class="week-score-title">📊 This week at a glance</div>
+    <div class="week-score-grid">
+      <div class="ws-cell"><div class="n ${scoreColor}">${ws.score}</div><div class="l">week score</div></div>
+      <div class="ws-cell"><div class="n ${workoutColor}">${ws.workoutsCompleted}/${ws.workoutsPlanned}</div><div class="l">workouts</div></div>
+      <div class="ws-cell"><div class="n ${ws.twoADays>0?'good':''}">+${ws.twoADays}</div><div class="l">bonus sessions</div></div>
+      <div class="ws-cell"><div class="n ${defColor}">${ws.avgDeficit>0?'+'+ws.avgDeficit:ws.avgDeficit}</div><div class="l">avg daily deficit</div></div>
+      <div class="ws-cell"><div class="n ${alcColor}">${ws.alcPerNight}</div><div class="l">drinks/night</div></div>
+      <div class="ws-cell"><div class="n">${ws.daysLogged}</div><div class="l">days tracked</div></div>
+    </div>
+    <button class="week-check-btn" id="week-check-btn" onclick="analyzeWeek()">🏆 Check if I earned a cheat meal</button>
+  </div>`;
+}
+
+function renderEarnedReport(){
+  if(!earnedReport) return '';
+  const r=earnedReport;
+  const cm=r.cheatMeal||{};
+  let h='';
+
+  if(r.earned){
+    h+=`<div class="earned-banner">
+      <div class="earned-banner-title">🏆 You earned it this week</div>
+      <div class="earned-banner-msg">${r.verdict}</div>
+    </div>`;
+  } else {
+    h+=`<div class="recovery-banner" style="background:var(--amber-dim);border-color:var(--amber)">
+      <div class="recovery-banner-title" style="color:var(--amber)">📈 Not quite yet</div>
+      <div class="recovery-banner-msg">${r.verdict}</div>
+    </div>`;
+  }
+
+  // Strengths and improvements
+  if((r.strengths||[]).length||(r.improvements||[]).length){
+    h+=`<div class="settings-section" style="margin-bottom:12px">`;
+    if(r.strengths?.length){
+      h+=`<div style="padding:10px 14px;border-bottom:1px solid var(--border)"><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);font-family:'DM Mono',monospace;margin-bottom:6px">What you did well</div>`;
+      r.strengths.forEach(s=>{h+=`<div style="font-size:13px;color:var(--text2);padding:3px 0;line-height:1.4">✓ ${s}</div>`;});
+      h+=`</div>`;
+    }
+    if(r.improvements?.length){
+      h+=`<div style="padding:10px 14px"><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);font-family:'DM Mono',monospace;margin-bottom:6px">Next week — work on</div>`;
+      r.improvements.forEach(s=>{h+=`<div style="font-size:13px;color:var(--text2);padding:3px 0;line-height:1.4">→ ${s}</div>`;});
+      h+=`</div>`;
+    }
+    h+=`</div>`;
+  }
+
+  // Cheat meal card
+  if(cm.name){
+    h+=`<div class="cheat-card">
+      <div class="cc-head">
+        <div class="cc-emoji">${cm.emoji||'🍔'}</div>
+        <div class="cc-name">${cm.name}</div>
+        <div class="cc-where">${cm.where||''}</div>
+      </div>
+      <div class="cc-body">
+        <div class="cc-why">${cm.why||''}</div>
+        <div class="cc-stats">
+          <div class="cc-stat"><div class="n">${cm.cal||'~'}</div><div class="l">cal</div></div>
+          <div class="cc-stat"><div class="n">${cm.pro||'~'}g</div><div class="l">protein</div></div>
+          <div class="cc-stat"><div class="n">${cm.when||'Sat'}</div><div class="l">best day</div></div>
+        </div>
+        ${cm.rules?.length?`<div class="cc-rules"><div class="cc-rules-title">Keep it from becoming a full cheat day</div>${cm.rules.map(rule=>`<div class="cc-rule">• ${rule}</div>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+  }
+
+  h+=`<button style="width:100%;padding:8px;background:none;border:1px solid var(--border2);color:var(--text3);border-radius:var(--radius-sm);font-size:11px;cursor:pointer;font-family:DM Mono,monospace;margin-bottom:12px" onclick="earnedReport=null;save();renderLog()">Dismiss</button>`;
+  return h;
+}
+
+// ─── RECOVERY PLAN ───────────────────────────────────────────────────────────
+async function generateRecoveryPlan(di){
+  const btn=document.getElementById('recovery-gen-btn');
+  if(btn){btn.disabled=true;btn.textContent='Analyzing…';}
+
+  // Build picture of what happened today
+  const logged=foodLog[di]||[];
+  const workedOut=!!(workoutLog[di]||[]).length;
+  const plannedMeals=DAYS[di].meals.map((m,mi)=>{
+    const r=M[swaps[di][mi]];
+    const st=eaten[di][mi]===true?'ate':eaten[di][mi]===false?'skipped':'unknown';
+    return `${m.slot}: ${swaps[di][mi]} (${r?.cal||0} cal, ${r?.pro||0}g pro) — ${st}`;
+  }).join('\n');
+  const loggedFood=logged.map(f=>`${f.name}: ${f.cal} cal, ${f.pro}g protein`).join('\n')||'None';
+  const alcCount=alcLog[dateKey(di)]||0;
+  const actual=getActualTotals(di);
+
+  // Build next 2 days info
+  const nextDays=[];
+  for(let i=1;i<=2;i++){
+    const ni=(di+i)%7;
+    const d=DAYS[ni];
+    nextDays.push(`Day ${i}: ${d.name} (${d.type==='gym'?d.sub:d.type==='golf'?'Golf day':'Rest day'})`);
+  }
+
+  const prompt=`You are a fitness and nutrition coach helping someone recover from an off day.
+
+Today is ${DAYS[di].name}. Their daily targets: ${settings.targetCal} cal, ${settings.targetPro}g protein, ${settings.targetCarb}g carbs, ${settings.targetFat}g fat.
+
+WHAT HAPPENED TODAY:
+Planned meals:
+${plannedMeals}
+
+Custom logged food (cheat meals, extras):
+${loggedFood}
+
+Alcohol consumed: ${alcCount} drinks (~${alcCount*130} extra calories)
+Worked out today: ${workedOut?'Yes':'No'}
+Actual totals: ${actual.cal} cal, ${actual.pro}g protein
+
+Calorie surplus/deficit vs target: ${actual.cal-settings.targetCal>0?'+':''}${actual.cal-settings.targetCal} calories
+Protein gap: ${actual.pro-settings.targetPro>0?'+':''}${actual.pro-settings.targetPro}g
+
+UPCOMING DAYS:
+${nextDays.join('\n')}
+
+Available meals in their plan (meal name → calories, protein):
+${Object.entries(M).map(([n,r])=>`${n}: ${r.cal} cal, ${r.pro}g protein`).join('\n')}
+
+Create a practical 1-2 day recovery plan. Be honest but not harsh. Focus on what's actually achievable.
+
+Rules:
+- If they went significantly over calories, suggest lower-cal meals for the next day
+- If they skipped the workout, suggest making it up — even on a rest day, a shorter version is fine
+- Don't suggest punishing restriction — just smart adjustments
+- Pick meals from the available meal list above
+- For workouts, use their existing plan exercises (Strength: goblet squat, RDL, chest press, rows, lat pulldown, face pulls | Rotational: cable woodchops, Pallof press, step-ups, single-leg RDL, farmer's carry, hip thrust | Or just 30 min cardio for a rest day)
+
+Respond ONLY with valid JSON (no markdown, no backticks):
+{
+  "summary": "2-3 sentence honest assessment of what happened and the general recovery approach",
+  "extraCalories": ${Math.max(0,actual.cal-settings.targetCal)},
+  "missedWorkout": ${!workedOut},
+  "days": [
+    {
+      "dayOffset": 1,
+      "dayName": "name of that day",
+      "calTarget": adjusted calorie target as number,
+      "proTarget": adjusted protein target as number,
+      "meals": [
+        {"slot": "Lunch · 1:00pm", "meal": "exact meal name from plan", "why": "brief reason"},
+        {"slot": "Snack · 4:00pm", "meal": "exact meal name from plan", "why": "brief reason"},
+        {"slot": "Dinner · 7:30pm", "meal": "exact meal name from plan", "why": "brief reason"}
+      ],
+      "workout": "specific workout recommendation — what to do and when",
+      "workoutNote": "brief explanation of why this workout helps"
+    }
+  ]
+}
+Only include days where meaningful adjustments are needed (1 day for minor overages, 2 days for a full cheat day).`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'{}');
+    recoveryPlan={dayIdx:di,generated:new Date().toISOString(),...parsed};
+    save();
+    showToast('Recovery plan ready ✓','ok');
+    renderLog();
+  }catch(e){
+    console.error(e);
+    showToast('Could not generate plan — try again','err');
+  }
+  if(btn){btn.disabled=false;btn.textContent='Generate recovery plan';}
+}
+
+async function applyRecoveryDay(dayOffset,meals,workout,calTarget,proTarget){
+  const di=recoveryPlan?.dayIdx;
+  if(di===undefined) return;
+  const targetDi=(di+dayOffset)%7;
+  const btn=document.getElementById(`apply-btn-${dayOffset}`);
+  if(btn){btn.disabled=true;btn.textContent='Applying…';}
+
+  // Apply meal swaps
+  meals.forEach(({slot,meal})=>{
+    if(!M[meal]) return;
+    const mi=DAYS[targetDi].meals.findIndex(m=>m.slot===slot);
+    if(mi>=0){
+      swaps[targetDi][mi]=meal;
+      // Patch calendar in background
+      patchEvent(DAYS[targetDi].meals[mi].eid,targetDi,mi,meal);
+    }
+  });
+
+  // If workout needed and it's a rest day, add a calendar event
+  if(workout && DAYS[targetDi].type==='rest'){
+    const dt=new Date('2026-03-23T00:00:00');
+    dt.setDate(dt.getDate()+targetDi);
+    const dateStr=dt.toISOString().split('T')[0];
+    try{
+      if(token){
+        await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',{
+          method:'POST',
+          headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+          body:JSON.stringify({
+            summary:'💪 Recovery Workout',
+            description:`Recovery workout — added to compensate for ${DAYS[di].name} cheat day.\n\n${workout}`,
+            start:{dateTime:`${dateStr}T17:00:00`,timeZone:'America/Chicago'},
+            end:{dateTime:`${dateStr}T18:00:00`,timeZone:'America/Chicago'},
+            colorId:'11',
+            reminders:{useDefault:false,overrides:[{method:'popup',minutes:60}]}
+          })
+        });
+      }
+    }catch(e){console.error('Calendar event creation failed:',e);}
+  }
+
+  save();
+  showToast(`${DAYS[targetDi].name} plan updated ✓`,'ok');
+  if(btn){btn.disabled=false;btn.textContent='✓ Applied';}
+  if(curTab==='plan') render();
+}
+
+function renderRecoveryBanner(di){
+  // Show recovery banner if there's significant overage today
+  const actual=getActualTotals(di);
+  const surplus=actual.cal-settings.targetCal;
+  const loggedCount=(foodLog[di]||[]).length;
+  const alcCount=alcLog[dateKey(di)]||0;
+  const workedOut=!!(workoutLog[di]||[]).length;
+  const noGym=DAYS[di].type==='gym'&&!workedOut;
+
+  if(surplus<300&&alcCount<5&&!noGym&&loggedCount===0) return ''; // nothing to recover from
+
+  let msg='';
+  if(surplus>500||alcCount>=5) msg=`You went ${surplus>0?'+'+surplus+' cal over target':'over on drinks'} today${alcCount>=5?` with ${alcCount} drinks (~${alcCount*130} extra cal)`:''}.`;
+  else if(noGym) msg=`You missed today's gym session.`;
+  else msg=`You had a few extras today (+${surplus} cal). Minor adjustments tomorrow will keep you on track.`;
+
+  return `<div class="recovery-banner">
+    <div class="recovery-banner-title">⚡ Recovery plan available</div>
+    <div class="recovery-banner-msg">${msg} Want the app to adjust tomorrow's meals and workout to compensate?</div>
+    <button class="recovery-btn" id="recovery-gen-btn" onclick="generateRecoveryPlan(${di})">Generate recovery plan</button>
+  </div>`;
+}
+
+function renderRecoveryPlan(){
+  if(!recoveryPlan) return '';
+  let h=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--amber);font-family:'DM Mono',monospace;margin-bottom:10px">⚡ Recovery plan — after ${DAYS[recoveryPlan.dayIdx]?.name||'cheat day'}</div>`;
+  h+=`<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px">${recoveryPlan.summary||''}</div>`;
+  (recoveryPlan.days||[]).forEach(day=>{
+    h+=`<div class="recovery-plan-card">
+      <div class="rpc-head"><div class="rpc-day">${day.dayName} · adjusted targets: ${day.calTarget} cal / ${day.proTarget}g protein</div></div>
+      <div class="rpc-body">`;
+    if(day.meals?.length){
+      h+=`<div class="rpc-section"><div class="rpc-label">Adjusted meals</div>`;
+      day.meals.forEach(m=>{h+=`<div class="rpc-item"><strong style="color:var(--text)">${m.slot}</strong> → ${m.meal}<br><span style="font-size:12px;color:var(--text3)">${m.why}</span></div>`;});
+      h+=`</div>`;
+    }
+    if(day.workout){
+      h+=`<div class="rpc-section"><div class="rpc-label">Workout${DAYS[(recoveryPlan.dayIdx+day.dayOffset)%7]?.type==='rest'?' (added to rest day)':''}</div>
+        <div class="rpc-item">${day.workout}</div>
+        ${day.workoutNote?`<div style="font-size:12px;color:var(--text3);margin-top:4px">${day.workoutNote}</div>`:''}
+      </div>`;
+    }
+    h+=`<button class="rpc-apply-btn" id="apply-btn-${day.dayOffset}" onclick="applyRecoveryDay(${day.dayOffset},${JSON.stringify(day.meals||[]).replace(/"/g,"'")},${JSON.stringify(day.workout||'').replace(/"/g,"'")},${day.calTarget},${day.proTarget})">Apply to ${day.dayName}</button>`;
+    h+=`</div></div>`;
+  });
+  h+=`<button style="width:100%;padding:8px;background:none;border:1px solid var(--border2);color:var(--text3);border-radius:var(--radius-sm);font-size:11px;cursor:pointer;font-family:DM Mono,monospace;margin-top:4px" onclick="recoveryPlan=null;save();renderLog()">Dismiss plan</button>`;
+  return h;
+}
+
 // ─── RENDER FOOD LOG TAB ──────────────────────────────────────────────────────
 function renderLog(){
   const budget=getRemainingBudget(curDay);
@@ -645,7 +1148,18 @@ function renderWorkout(){
   document.getElementById('workout-content').innerHTML=h;
 }
 
-// ─── RENDER GROCERY ───────────────────────────────────────────────────────────
+// ─── PANTRY & GROCERY ─────────────────────────────────────────────────────────
+const PANTRY_CATS=['Meat & fish','Produce','Dairy & eggs','Pantry staples','Leftovers','Other'];
+let activePantryCat='Pantry staples';
+
+function addPantryItem(){
+  const input=document.getElementById('pantry-input');
+  const val=input.value.trim(); if(!val) return;
+  pantry[val]=activePantryCat;
+  input.value=''; save(); renderGrocery();
+}
+function removePantryItem(name){delete pantry[name];save();renderGrocery();}
+
 function buildGroceryList(){
   const cats={meat:[],produce:[],dairy:[],pantry:[],prep:[]};
   const seen={};
@@ -655,17 +1169,117 @@ function buildGroceryList(){
 function toggleGrocery(key){groceryChecked[key]=!groceryChecked[key];save();renderGrocery();}
 function clearGrocery(){groceryChecked={};save();renderGrocery();}
 function checkAll(){const list=buildGroceryList();Object.entries(list).forEach(([cat,items])=>{items.forEach(item=>{groceryChecked[cat+'|'+item]=true;});});save();renderGrocery();}
+
+async function getSuggestions(){
+  const btn=document.getElementById('suggest-btn');
+  btn.disabled=true; btn.textContent='Finding meals…';
+  const pantryList=Object.keys(pantry);
+  if(!pantryList.length){
+    document.getElementById('suggestions-area').innerHTML=`<div style="font-size:13px;color:var(--text3);text-align:center;padding:20px">Add some items to your pantry first.</div>`;
+    btn.disabled=false; btn.textContent='🤖 Suggest meals from my pantry'; return;
+  }
+  const mealList=Object.entries(M).map(([name,r])=>{
+    const ings=r.ing.map(([n])=>n).join(', ');
+    return `${name} (${r.cal} cal, ${r.pro}g protein, ${r.carb}g carbs, ${r.fat}g fat) — needs: ${ings}`;
+  }).join('\n');
+  const prompt=`You are a nutrition assistant helping someone decide what to cook based on what they have at home.
+Daily targets: ${settings.targetCal} cal, ${settings.targetPro}g protein, ${settings.targetCarb}g carbs, ${settings.targetFat}g fat.
+What they have in their pantry right now:
+${pantryList.map(i=>`• ${i} (${pantry[i]})`).join('\n')}
+Available meals from their plan:
+${mealList}
+Suggest 3 meals from the plan that best match what they have. Prioritize meals where they already have most ingredients. Consider their nutrition targets.
+Respond ONLY with valid JSON (no markdown, no backticks):
+[{"meal":"exact meal name from the plan","slot":"best meal slot e.g. Lunch, Dinner, Snack","why":"1-2 sentences why this works with what they have and fits their goals","have":["ingredients they already have"],"need":["ingredients still needed"],"swapDay":0,"swapMealIdx":0}]
+For swapDay: 0=Mon,1=Tue,2=Wed,3=Thu,4=Fri,5=Sat,6=Sun. Pick most appropriate day.
+For swapMealIdx: 0=first meal, 1=second meal, 2=third meal of that day.`;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    const parsed=JSON.parse(data.content?.[0]?.text.replace(/```json|```/g,'').trim()||'[]');
+    suggestions=parsed;
+    renderSuggestions();
+  }catch(e){
+    document.getElementById('suggestions-area').innerHTML=`<div style="font-size:13px;color:var(--red);text-align:center;padding:20px">Could not generate suggestions. Try again.</div>`;
+  }
+  btn.disabled=false; btn.textContent='🤖 Suggest meals from my pantry';
+}
+
+function swapFromSuggestion(mealName,dayIdx,mealIdx){
+  if(!M[mealName]) return;
+  swaps[dayIdx][mealIdx]=mealName;
+  save(); showToast(`Swapped ${DAYS[dayIdx].name} to ${mealName}`,'ok');
+  renderGrocery(); if(curTab==='plan') render();
+}
+
+function renderSuggestions(){
+  const el=document.getElementById('suggestions-area'); if(!el) return;
+  if(!suggestions.length){el.innerHTML='';return;}
+  let h='';
+  suggestions.forEach(s=>{
+    const r=M[s.meal]||{};
+    h+=`<div class="suggestion-card"><div class="sc-head">
+      <div class="sc-name">${s.meal}</div>
+      <div class="sc-slot">${s.slot}</div>
+      <div class="sc-why">${s.why}</div>
+      ${r.cal?`<div class="sc-have"><span class="sc-tag macro">${r.cal} cal</span><span class="sc-tag macro">${r.pro}g pro</span><span class="sc-tag macro">${r.carb}g carbs</span><span class="sc-tag macro">${r.fat}g fat</span></div>`:''}
+      ${(s.have||[]).length?`<div class="sc-have" style="margin-top:6px">${s.have.map(i=>`<span class="sc-tag have">✓ ${i}</span>`).join('')}</div>`:''}
+      ${(s.need||[]).length?`<div class="sc-have" style="margin-top:4px">${s.need.map(i=>`<span class="sc-tag need">+ ${i}</span>`).join('')}</div>`:''}
+    </div><div class="sc-actions">
+      <button class="sc-swap-btn" onclick="swapFromSuggestion('${s.meal.replace(/'/g,"\'")}',${s.swapDay||0},${s.swapMealIdx||0})">Swap into ${DAYS[s.swapDay||0]?.name||'Mon'} plan</button>
+    </div></div>`;
+  });
+  el.innerHTML=h;
+}
+
 function renderGrocery(){
   const list=buildGroceryList();
   const catNames={meat:'🥩 Meat & fish',produce:'🥦 Produce',dairy:'🥚 Dairy & eggs',pantry:'🥫 Pantry',prep:'📦 From Sunday prep'};
-  let h=`<div class="grocery-actions"><button class="gact-btn" onclick="clearGrocery()">Clear all checks</button><button class="gact-btn" onclick="checkAll()">Check all</button></div>`;
+  const pantryItems=Object.entries(pantry);
+  let h='';
+
+  // PANTRY
+  h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--amber);font-family:'DM Mono',monospace;margin-bottom:10px">🏠 What I already have</div>`;
+  h+=`<div class="pantry-cats">`;
+  PANTRY_CATS.forEach(cat=>{h+=`<button class="pantry-cat-btn${activePantryCat===cat?' active':''}" onclick="activePantryCat='${cat}';renderGrocery()">${cat}</button>`;});
+  h+=`</div>`;
+  h+=`<div class="pantry-input-row"><input class="pantry-input" id="pantry-input" type="text" placeholder="Add item — e.g. ground beef, soy sauce…" onkeydown="if(event.key==='Enter')addPantryItem()"><button class="pantry-add-btn" onclick="addPantryItem()">Add</button></div>`;
+  if(pantryItems.length){
+    const grouped={};
+    pantryItems.forEach(([name,cat])=>{if(!grouped[cat]) grouped[cat]=[];grouped[cat].push(name);});
+    Object.entries(grouped).forEach(([cat,items])=>{
+      h+=`<div class="pantry-section"><div class="gs-title" style="color:var(--amber);border-color:var(--amber-dim)">${cat}</div>`;
+      items.forEach(name=>{h+=`<div class="pi"><span class="pi-name">${name}</span><button class="pi-del" onclick="removePantryItem('${name.replace(/'/g,"\'")}')">✕</button></div>`;});
+      h+=`</div>`;
+    });
+  } else {
+    h+=`<div style="font-size:13px;color:var(--text3);padding:12px 0 16px">No pantry items yet — add what you already have at home.</div>`;
+  }
+
+  // SUGGESTIONS
+  h+=`<div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px;margin-bottom:12px">`;
+  h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--purple);font-family:'DM Mono',monospace;margin-bottom:10px">🤖 Meal suggestions from pantry</div>`;
+  h+=`<button class="suggest-btn" id="suggest-btn" onclick="getSuggestions()">${pantryItems.length?'🤖 Suggest meals from my pantry':'Add pantry items above to get suggestions'}</button>`;
+  h+=`<div id="suggestions-area"></div></div>`;
+
+  // SHOPPING LIST
+  h+=`<div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:12px">`;
+  h+=`<div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:10px">🛒 Shopping list</div>`;
+  h+=`<div class="grocery-actions"><button class="gact-btn" onclick="clearGrocery()">Clear all checks</button><button class="gact-btn" onclick="checkAll()">Check all</button></div>`;
   Object.entries(catNames).forEach(([cat,title])=>{
     const items=list[cat];if(!items?.length) return;
     h+=`<div class="grocery-section"><div class="gs-title">${title}</div>`;
-    items.forEach(item=>{const key=cat+'|'+item;const checked=!!groceryChecked[key];h+=`<div class="gi${checked?' checked':''}" onclick="toggleGrocery('${key.replace(/'/g,"\\'")}')"><div class="gi-check"></div><div class="gi-name">${item}</div></div>`;});
+    items.forEach(item=>{
+      const key=cat+'|'+item;const checked=!!groceryChecked[key];
+      const inPantry=Object.keys(pantry).some(p=>p.toLowerCase().includes(item.toLowerCase().split(' ')[0]));
+      h+=`<div class="gi${checked?' checked':''}" onclick="toggleGrocery('${key.replace(/'/g,"\'")}')"><div class="gi-check"></div><div class="gi-name" style="${inPantry&&!checked?'color:var(--green)':''}">${item}${inPantry?` <span style="font-size:10px;color:var(--green);font-family:DM Mono,monospace">✓ in pantry</span>`:''}</div></div>`;
+    });
     h+=`</div>`;
   });
+  h+=`</div>`;
+
   document.getElementById('grocery-content').innerHTML=h;
+  if(suggestions.length) renderSuggestions();
 }
 
 // ─── RENDER HISTORY ───────────────────────────────────────────────────────────
